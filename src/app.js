@@ -12,6 +12,8 @@ const generateImage = require("./image");
 const generateVoice = require("./ai/voice/generateVoice");
 const generateVideo = require("./videoGenerator");
 
+const getNextCaseNumber = require("./utils/caseManager");
+
 const outputDir = path.join(__dirname, "../output");
 
 function wait(milliseconds) {
@@ -65,6 +67,10 @@ async function main() {
 
   prepareOutputFolder();
 
+  const caseNumber = getNextCaseNumber();
+
+  console.log(`📂 New Case Assigned: ${caseNumber}`);
+
   console.log("📖 Generating Hindi Case Story...");
   const story = await generateStory();
 
@@ -77,11 +83,19 @@ async function main() {
   console.log("🎬 AI Director is planning the complete film...");
   const directorPlan = await generateDirectorPlan(story);
 
+  if (!directorPlan.caseInfo) {
+    directorPlan.caseInfo = {};
+  }
+
+  directorPlan.caseInfo.caseNumber = caseNumber;
+
   const scenes = directorPlan.scenes;
 
   saveTextFile("story.txt", story);
   saveTextFile("caption.txt", caption);
   saveTextFile("hashtags.txt", hashtags);
+
+  saveTextFile("case_number.txt", caseNumber);
 
   saveJsonFile("director.json", directorPlan);
   saveJsonFile("scenes.json", scenes);
@@ -90,12 +104,8 @@ async function main() {
   console.log(
     `🎭 Main Character: ${directorPlan.mainCharacter.name}`
   );
-  console.log(
-    `📂 Case: ${directorPlan.caseInfo.caseNumber}`
-  );
-  console.log(
-    `🎞️ ${scenes.length} Directed Scenes Created`
-  );
+  console.log(`📂 Case: ${caseNumber}`);
+  console.log(`🎞️ ${scenes.length} Directed Scenes Created`);
 
   console.log("\n🖼️ Generating Director-Guided Scene Images...");
 
@@ -145,6 +155,7 @@ async function main() {
   );
 
   console.log("📁 Output Folder:");
+  console.log("✔ case_number.txt");
   console.log("✔ story.txt");
   console.log("✔ caption.txt");
   console.log("✔ hashtags.txt");
@@ -168,7 +179,7 @@ main().catch((error) => {
 
   console.error(
     error.response?.data ||
-      error.message
+    error.message
   );
 
   process.exitCode = 1;
