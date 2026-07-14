@@ -1,0 +1,21 @@
+{
+  "name": "midnightos",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node src/app.js",
+    "test": "echo \"No tests yet\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@google/genai": "^2.11.0",
+    "axios": "^1.18.1",
+    "dotenv": "^17.4.2",
+    "edge-tts": "^1.0.1"
+  }
+}
