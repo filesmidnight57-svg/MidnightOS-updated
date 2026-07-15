@@ -569,11 +569,11 @@ function createIntroFilter(duration) {
   return (
     "[0:v]format=rgba[base];" +
     "[1:v]scale=360:-1,format=rgba," +
-    "colorchannelmixer=aa='if(lt(t\\,0.65)\\,0\\,min(1\\,(t-0.65)/0.9))*if(gte(t\\," +
+    "colorchannelmixer=aa=1," +
+    "fade=t=in:st=0.65:d=0.9:alpha=1," +
+    "fade=t=out:st=" +
       fadeOutStart +
-      ")\\,max(0\\,1-(t-" +
-      fadeOutStart +
-      ")/0.55)\\,1)'[logo];" +
+      ":d=0.55:alpha=1[logo];" +
     "[logo]split=2[sharp][glowseed];" +
     "[glowseed]boxblur=22:2,colorchannelmixer=aa=0.46[glow];" +
     "[base][glow]overlay=x=(W-w)/2:y=h*0.22[withglow];" +
