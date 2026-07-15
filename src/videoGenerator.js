@@ -593,9 +593,9 @@ function createIntroFilter(duration) {
       ")\\,max(0\\,1-(t-" +
       fadeOutStart +
       ")/0.55)\\,1)'[texted];" +
-    "[texted]drawbox=x=0:y=h*0.53:w=w:h=4:color=0x9ad7ffff@0.25:" +
+    "[texted]drawbox=x=0:y=1017.6:w=1080:h=4:color=0x9ad7ffff@0.25:" +
       "enable='between(t\\,2.22\\,2.32)'[glitch1];" +
-    "[glitch1]drawbox=x=0:y=h*0.49:w=w:h=2:color=white@0.28:" +
+    "[glitch1]drawbox=x=0:y=940.8:w=1080:h=2:color=white@0.28:" +
       "enable='between(t\\,2.33\\,2.40)',fade=t=in:st=0:d=0.45," +
       "fade=t=out:st=" +
       fadeOutStart +
@@ -614,7 +614,7 @@ function buildClassifiedCardFilter(duration, brandingInfo) {
     "drawtext=font='Arial':text='CLASSIFIED':fontcolor=white:fontsize=56:x=w*0.20:y=h*0.495",
     "drawtext=font='Arial':text='ACCESS LEVEL\\:':fontcolor=0x8fa3b8:fontsize=34:x=w*0.20:y=h*0.615",
     "drawtext=font='Arial':text='RESTRICTED':fontcolor=white:fontsize=56:x=w*0.20:y=h*0.655",
-    "drawbox=x=w*0.14:y=h*0.29:w=w*0.72:h=h*0.46:color=0x101820@0.28:t=3",
+    "drawbox=x=151.2:y=556.8:w=777.6:h=883.2:color=0x101820@0.28:t=3",
     "fade=t=in:st=0:d=0.35",
     `fade=t=out:st=${fadeOutStart}:d=0.35`,
     "format=yuv420p",
