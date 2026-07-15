@@ -19,6 +19,7 @@
     "@google/genai": "^2.11.0",
     "axios": "^1.18.1",
     "dotenv": "^17.4.2",
-    "edge-tts": "^1.0.1"
+    "edge-tts": "^1.0.1",
+    "google-auth-library": "^10.9.0"
   }
 }

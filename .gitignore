@@ -3,3 +3,7 @@ output/
 .env
 *.log
 video_temp/
+
+# Local OAuth token overrides
+youtube-oauth.json
+.midnightos/
