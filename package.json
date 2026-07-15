@@ -7,7 +7,8 @@
     "start": "node src/app.js",
     "dev": "node src/app.js",
     "test": "echo \"No tests yet\"",
-    "publish": "node src/youtubePublisher.js"
+    "publish": "node src/youtubePublisher.js",
+    "dashboard": "node src/dashboard.js"
   },
   "keywords": [],
   "author": "",
