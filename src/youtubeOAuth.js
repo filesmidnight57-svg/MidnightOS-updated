@@ -1,11 +1,19 @@
 require("dotenv").config();
 
+const fs = require("fs");
 const http = require("http");
-const https = require("https");
+const os = require("os");
+const path = require("path");
 const { URL } = require("url");
+const { OAuth2Client } = require("google-auth-library");
 
 const DEFAULT_REDIRECT_URI = "http://localhost:53682/oauth2callback";
 const YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload";
+const DEFAULT_TOKEN_PATH = path.join(os.homedir(), ".midnightos", "youtube-oauth.json");
+
+function getTokenPath() {
+  return process.env.YOUTUBE_TOKEN_PATH || DEFAULT_TOKEN_PATH;
+}
 
 function getOAuthConfig() {
   const clientId = process.env.YOUTUBE_CLIENT_ID;
@@ -13,71 +21,97 @@ function getOAuthConfig() {
   const redirectUri = process.env.YOUTUBE_REDIRECT_URI || DEFAULT_REDIRECT_URI;
 
   if (!clientId || !clientSecret) {
-    throw new Error("Set YOUTUBE_CLIENT_ID and YOUTUBE_CLIENT_SECRET before running OAuth setup.");
+    throw new Error(getMissingCredentialsMessage());
   }
 
   return { clientId, clientSecret, redirectUri };
 }
 
-function buildAuthUrl({ clientId, redirectUri }) {
-  const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-  authUrl.searchParams.set("client_id", clientId);
-  authUrl.searchParams.set("redirect_uri", redirectUri);
-  authUrl.searchParams.set("response_type", "code");
-  authUrl.searchParams.set("scope", YOUTUBE_UPLOAD_SCOPE);
-  authUrl.searchParams.set("access_type", "offline");
-  authUrl.searchParams.set("prompt", "consent");
-  return authUrl.toString();
+function createOAuthClient(config = getOAuthConfig()) {
+  return new OAuth2Client(config.clientId, config.clientSecret, config.redirectUri);
 }
 
-function requestJson(url, options = {}, body) {
-  return new Promise((resolve, reject) => {
-    const request = https.request(url, options, (response) => {
-      const chunks = [];
-      response.on("data", (chunk) => chunks.push(chunk));
-      response.on("end", () => {
-        const text = Buffer.concat(chunks).toString("utf8");
-        let data = {};
-        if (text) {
-          try {
-            data = JSON.parse(text);
-          } catch (error) {
-            reject(new Error(`OAuth response was not valid JSON: ${text}`));
-            return;
-          }
-        }
-
-        if (response.statusCode < 200 || response.statusCode >= 300) {
-          reject(new Error(`OAuth token exchange failed (${response.statusCode}): ${text}`));
-          return;
-        }
-
-        resolve(data);
-      });
-    });
-
-    request.on("error", reject);
-    if (body) request.write(body);
-    request.end();
+function buildAuthUrl(config = getOAuthConfig()) {
+  const client = createOAuthClient(config);
+  return client.generateAuthUrl({
+    access_type: "offline",
+    prompt: "consent",
+    scope: [YOUTUBE_UPLOAD_SCOPE],
   });
 }
 
 async function exchangeCodeForTokens(code, config = getOAuthConfig()) {
-  const body = new URLSearchParams({
-    client_id: config.clientId,
-    client_secret: config.clientSecret,
-    code,
-    grant_type: "authorization_code",
-    redirect_uri: config.redirectUri,
-  }).toString();
+  const client = createOAuthClient(config);
+  const { tokens } = await client.getToken(code);
+  return tokens;
+}
 
-  return requestJson("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      "Content-Length": Buffer.byteLength(body),
-    },
-  }, body);
+function ensurePrivateDirectory(directoryPath) {
+  fs.mkdirSync(directoryPath, { recursive: true, mode: 0o700 });
+  fs.chmodSync(directoryPath, 0o700);
+}
+
+function saveTokens(tokens, tokenPath = getTokenPath()) {
+  if (!tokens.refresh_token) {
+    throw new Error("Google did not return a refresh token. Revoke app access and retry with prompt=consent.");
+  }
+
+  ensurePrivateDirectory(path.dirname(tokenPath));
+  const tokenRecord = {
+    type: "authorized_user",
+    client_id: process.env.YOUTUBE_CLIENT_ID,
+    client_secret: process.env.YOUTUBE_CLIENT_SECRET,
+    refresh_token: tokens.refresh_token,
+    scope: tokens.scope || YOUTUBE_UPLOAD_SCOPE,
+    token_uri: "https://oauth2.googleapis.com/token",
+    saved_at: new Date().toISOString(),
+  };
+
+  fs.writeFileSync(tokenPath, JSON.stringify(tokenRecord, null, 2), { mode: 0o600 });
+  fs.chmodSync(tokenPath, 0o600);
+  return tokenPath;
+}
+
+function loadSavedTokens(tokenPath = getTokenPath()) {
+  if (!fs.existsSync(tokenPath)) return null;
+  return JSON.parse(fs.readFileSync(tokenPath, "utf8"));
+}
+
+function getMissingCredentialsMessage() {
+  return [
+    "Missing YouTube OAuth credentials.",
+    "1. Create a Google Cloud OAuth client for a Desktop app or Web app with redirect URI http://localhost:53682/oauth2callback.",
+    "2. Enable the YouTube Data API v3 and set YOUTUBE_CLIENT_ID and YOUTUBE_CLIENT_SECRET in .env.",
+    "3. Run npm run youtube:auth to complete local browser login and securely save the refresh token.",
+    "4. Run npm run publish -- --dry-run to validate assets, then YOUTUBE_PUBLISH_MODE=live npm run publish to upload.",
+    "See docs/YOUTUBE_SETUP.md for full setup instructions.",
+  ].join("\n");
+}
+
+function getRefreshToken() {
+  if (process.env.YOUTUBE_REFRESH_TOKEN) return process.env.YOUTUBE_REFRESH_TOKEN;
+  const savedTokens = loadSavedTokens();
+  return savedTokens && savedTokens.refresh_token;
+}
+
+async function getAccessToken() {
+  const config = getOAuthConfig();
+  const refreshToken = getRefreshToken();
+
+  if (!refreshToken) {
+    throw new Error(getMissingCredentialsMessage());
+  }
+
+  const client = createOAuthClient(config);
+  client.setCredentials({ refresh_token: refreshToken });
+  const accessTokenResponse = await client.getAccessToken();
+  const accessToken = accessTokenResponse && accessTokenResponse.token;
+
+  if (!accessToken) {
+    throw new Error("Google OAuth did not return an access token.");
+  }
+
+  return accessToken;
 }
 
 function waitForCode(redirectUri) {
@@ -123,13 +157,10 @@ async function runOAuthSetup() {
 
   const code = await waitForCode(config.redirectUri);
   const tokens = await exchangeCodeForTokens(code, config);
+  const tokenPath = saveTokens(tokens);
 
-  if (!tokens.refresh_token) {
-    throw new Error("Google did not return a refresh token. Revoke app access and retry with prompt=consent.");
-  }
-
-  console.log("\nAdd this value to your .env file:");
-  console.log(`YOUTUBE_REFRESH_TOKEN=${tokens.refresh_token}`);
+  console.log(`\n✅ Refresh token saved securely to ${tokenPath}`);
+  console.log("Keep this file private. It is chmod 600 and is used automatically by the YouTube Publisher.");
 }
 
 if (require.main === module) {
@@ -140,7 +171,14 @@ if (require.main === module) {
 }
 
 module.exports = {
+  DEFAULT_TOKEN_PATH,
   YOUTUBE_UPLOAD_SCOPE,
   buildAuthUrl,
   exchangeCodeForTokens,
+  getAccessToken,
+  getMissingCredentialsMessage,
+  getRefreshToken,
+  getTokenPath,
+  loadSavedTokens,
+  saveTokens,
 };

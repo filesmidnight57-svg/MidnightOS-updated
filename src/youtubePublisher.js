@@ -3,6 +3,7 @@ require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 const https = require("https");
+const { getAccessToken, getMissingCredentialsMessage } = require("./youtubeOAuth");
 
 const DEFAULT_OUTPUT_DIR = path.join(__dirname, "../output");
 const VALID_PRIVACY_STATUSES = new Set(["private", "unlisted", "public"]);
@@ -143,35 +144,6 @@ function requestJson(url, options = {}, body) {
   });
 }
 
-async function getAccessToken() {
-  const clientId = process.env.YOUTUBE_CLIENT_ID;
-  const clientSecret = process.env.YOUTUBE_CLIENT_SECRET;
-  const refreshToken = process.env.YOUTUBE_REFRESH_TOKEN;
-
-  if (!clientId || !clientSecret || !refreshToken) {
-    throw new Error(
-      "Live YouTube publishing requires YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET, and YOUTUBE_REFRESH_TOKEN."
-    );
-  }
-
-  const body = new URLSearchParams({
-    client_id: clientId,
-    client_secret: clientSecret,
-    refresh_token: refreshToken,
-    grant_type: "refresh_token",
-  }).toString();
-
-  const response = await requestJson("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      "Content-Length": Buffer.byteLength(body),
-    },
-  }, body);
-
-  return response.data.access_token;
-}
-
 function requestStream(url, options, stream) {
   return new Promise((resolve, reject) => {
     const request = https.request(url, options, (response) => {
@@ -290,6 +262,17 @@ function buildDryRunResult(inputs) {
   };
 }
 
+function parseCliOptions(argv = process.argv.slice(2)) {
+  const options = {};
+
+  for (const arg of argv) {
+    if (arg === "--dry-run") options.mode = "dry-run";
+    if (arg === "--live" || arg === "--upload") options.mode = "live";
+  }
+
+  return options;
+}
+
 function writeUploadReport(outputDir, report) {
   const reportPath = path.join(outputDir, "upload_report.json");
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2), "utf8");
@@ -300,6 +283,10 @@ async function publishYouTubeShorts(options = {}) {
   const outputDir = options.outputDir || process.env.MIDNIGHTOS_OUTPUT_DIR || DEFAULT_OUTPUT_DIR;
   const mode = normalizeMode(options.mode || process.env.YOUTUBE_PUBLISH_MODE);
   const inputs = loadPublishingInputs(outputDir);
+  if (mode === "live" && !process.env.YOUTUBE_CLIENT_ID) {
+    throw new Error(getMissingCredentialsMessage());
+  }
+
   const result = mode === "live" ? await uploadLive(inputs) : buildDryRunResult(inputs);
 
   const report = {
@@ -323,7 +310,7 @@ async function publishYouTubeShorts(options = {}) {
 }
 
 if (require.main === module) {
-  publishYouTubeShorts()
+  publishYouTubeShorts(parseCliOptions())
     .then(({ reportPath, report }) => {
       console.log(`✅ YouTube Publisher finished in ${report.mode} mode.`);
       console.log(`📝 Upload report saved: ${reportPath}`);
@@ -340,4 +327,5 @@ module.exports = {
   loadPublishingInputs,
   normalizeMode,
   normalizePrivacyStatus,
+  parseCliOptions,
 };
