@@ -64,6 +64,42 @@ function saveJsonFile(fileName, data) {
   );
 }
 
+function hasSuspiciousMojibake(text) {
+  return /(?:à¤|à¥|Ã|Â|â€|ðŸ)/.test(String(text || ""));
+}
+
+function hasDevanagari(text) {
+  return /[\u0900-\u097F]/.test(String(text || ""));
+}
+
+function validatePublishingMetadata() {
+  const title = fs.readFileSync(
+    path.join(outputDir, "title.txt"),
+    { encoding: UTF8_ENCODING }
+  );
+  const youtubeText = fs.readFileSync(
+    path.join(outputDir, "youtube.json"),
+    { encoding: UTF8_ENCODING }
+  );
+
+  if (hasSuspiciousMojibake(title) || hasSuspiciousMojibake(youtubeText)) {
+    throw new Error(
+      "Publishing metadata is still corrupted: title.txt or youtube.json contains suspicious mojibake patterns."
+    );
+  }
+
+  const caption = fs.readFileSync(
+    path.join(outputDir, "caption.txt"),
+    { encoding: UTF8_ENCODING }
+  );
+
+  if (hasDevanagari(caption) && !hasDevanagari(`${title}\n${youtubeText}`)) {
+    throw new Error(
+      "Publishing metadata validation failed: valid Devanagari source text was not preserved in generated metadata."
+    );
+  }
+}
+
 async function main() {
   console.log("🚀 MidnightOS AI Director Started\n");
 
@@ -154,6 +190,7 @@ async function main() {
 
   console.log("\n📣 Creating AI Publishing Pack...");
   generatePublishingPack(outputDir);
+  validatePublishingMetadata();
 
   console.log(
     "\n✅ MIDNIGHTOS AI DIRECTOR VIDEO GENERATED SUCCESSFULLY!\n"

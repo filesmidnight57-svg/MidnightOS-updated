@@ -79,14 +79,12 @@ function runCommand(
 
     let errorOutput = "";
 
+    if (progressMessage) {
+      console.log(progressMessage);
+    }
+
     childProcess.stderr.on("data", (data) => {
       errorOutput += data.toString();
-
-      if (progressMessage) {
-        process.stdout.write(
-          `\r${progressMessage}`
-        );
-      }
     });
 
     childProcess.on("error", (error) => {
@@ -103,10 +101,6 @@ function runCommand(
     });
 
     childProcess.on("close", (exitCode) => {
-      if (progressMessage) {
-        process.stdout.write("\n");
-      }
-
       if (exitCode !== 0) {
         reject(
           new Error(

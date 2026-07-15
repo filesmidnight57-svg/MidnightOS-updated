@@ -58,7 +58,7 @@ function readJson(outputDir, fileName) {
 }
 
 function hasUnicodeMojibake(text) {
-  return /(?:à¤|à¥|Ã|Â|â|ðŸ)/.test(String(text || ""));
+  return /(?:à¤|à¥|Ã|Â|â€|ðŸ)/.test(String(text || ""));
 }
 
 function repairUnicodeMojibake(text) {
