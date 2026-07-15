@@ -5,6 +5,7 @@ const zlib = require("zlib");
 const THUMBNAIL_WIDTH = 1280;
 const THUMBNAIL_HEIGHT = 720;
 const TAG_COUNT = 20;
+const UTF8_ENCODING = "utf8";
 
 const FONT = {
   A: ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
@@ -49,7 +50,7 @@ const FONT = {
 };
 
 function readText(outputDir, fileName) {
-  return fs.readFileSync(path.join(outputDir, fileName), "utf8").trim();
+  return fs.readFileSync(path.join(outputDir, fileName), UTF8_ENCODING).trim();
 }
 
 function readJson(outputDir, fileName) {
@@ -250,8 +251,12 @@ function createThumbnail(thumbnailPath, thumbnailText) {
   ]));
 }
 
+function writeUtf8Text(filePath, content) {
+  fs.writeFileSync(filePath, content, { encoding: UTF8_ENCODING });
+}
+
 function writeJson(filePath, data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+  writeUtf8Text(filePath, `${JSON.stringify(data, null, 2)}\n`);
 }
 
 function generatePublishingPack(outputDir) {
@@ -267,10 +272,10 @@ function generatePublishingPack(outputDir) {
   const thumbnailText = buildThumbnailText(directorPlan, story);
 
   createThumbnail(path.join(outputDir, "thumbnail.png"), thumbnailText);
-  fs.writeFileSync(path.join(outputDir, "title.txt"), `${title}\n`, "utf8");
-  fs.writeFileSync(path.join(outputDir, "description.txt"), `${description}\n`, "utf8");
-  fs.writeFileSync(path.join(outputDir, "tags.txt"), `${tags.join("\n")}\n`, "utf8");
-  fs.writeFileSync(path.join(outputDir, "pinned_comment.txt"), `${pinnedComment}\n`, "utf8");
+  writeUtf8Text(path.join(outputDir, "title.txt"), `${title}\n`);
+  writeUtf8Text(path.join(outputDir, "description.txt"), `${description}\n`);
+  writeUtf8Text(path.join(outputDir, "tags.txt"), `${tags.join("\n")}\n`);
+  writeUtf8Text(path.join(outputDir, "pinned_comment.txt"), `${pinnedComment}\n`);
 
   const youtube = { title, description, tags, thumbnail: "thumbnail.png" };
   writeJson(path.join(outputDir, "youtube.json"), youtube);

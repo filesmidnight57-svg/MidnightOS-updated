@@ -16,6 +16,7 @@ const generatePublishingPack = require("./publishing");
 const getNextCaseNumber = require("./utils/caseManager");
 
 const outputDir = path.join(__dirname, "../output");
+const UTF8_ENCODING = "utf8";
 
 function wait(milliseconds) {
   return new Promise((resolve) => {
@@ -51,7 +52,7 @@ function saveTextFile(fileName, content) {
   fs.writeFileSync(
     path.join(outputDir, fileName),
     content,
-    "utf8"
+    { encoding: UTF8_ENCODING }
   );
 }
 
@@ -59,7 +60,7 @@ function saveJsonFile(fileName, data) {
   fs.writeFileSync(
     path.join(outputDir, fileName),
     JSON.stringify(data, null, 2),
-    "utf8"
+    { encoding: UTF8_ENCODING }
   );
 }
 
