@@ -27,6 +27,13 @@ const backgroundMusicPath = path.join(
   "horror_background.mp3"
 );
 
+const logoPath = path.join(
+  projectRoot,
+  "assets",
+  "branding",
+  "logo.png"
+);
+
 const videoPath = path.join(
   outputFolder,
   "horror_video.mp4"
@@ -371,7 +378,7 @@ function prepareSubtitleFile(introDuration = 0) {
   return temporarySubtitlePath;
 }
 
-function createZoomFilter(
+function createSceneBaseFilter(
   sceneNumber,
   sceneDuration
 ) {
@@ -413,6 +420,32 @@ function createZoomFilter(
   ].join(",");
 }
 
+function createLogoOverlayFilter(
+  size = 170,
+  opacity = 0.32,
+  margin = 46
+) {
+  return (
+    `[1:v]scale=${size}:-1,format=rgba,` +
+    `colorchannelmixer=aa=${opacity}[logo];` +
+    `[base][logo]overlay=x=W-w-${margin}:` +
+    `y=H-h-${margin}:format=auto,format=yuv420p`
+  );
+}
+
+function createBrandingLogoFilter(
+  size = 260,
+  yPosition = "h*0.16",
+  opacity = 1
+) {
+  return (
+    `[1:v]scale=${size}:-1,format=rgba,` +
+    `colorchannelmixer=aa=${opacity}[logo];` +
+    `[base][logo]overlay=x=(W-w)/2:y=${yPosition}:` +
+    "format=auto[branded]"
+  );
+}
+
 async function createSceneClip(
   imagePath,
   sceneNumber,
@@ -426,10 +459,14 @@ async function createSceneClip(
     clipName
   );
 
-  const videoFilter = createZoomFilter(
+  const sceneBaseFilter = createSceneBaseFilter(
     sceneNumber,
     sceneDuration
   );
+
+  const videoFilter =
+    `[0:v]${sceneBaseFilter}[base];` +
+    createLogoOverlayFilter();
 
   const ffmpegArguments = [
     "-y",
@@ -440,10 +477,13 @@ async function createSceneClip(
     "-i",
     imagePath,
 
+    "-i",
+    logoPath,
+
     "-t",
     sceneDuration.toFixed(3),
 
-    "-vf",
+    "-filter_complex",
     videoFilter,
 
     "-an",
@@ -538,7 +578,7 @@ async function createBrandingClip(type, duration, brandingInfo) {
     ? brandingInfo.caseNumber
     : "FOLLOW FOR NEXT CASE";
 
-  const videoFilter = [
+  const cardFilter = [
     "drawtext=font='Arial':" +
       `text='${firstLine}':` +
       "fontcolor=white:fontsize=82:" +
@@ -556,8 +596,15 @@ async function createBrandingClip(type, duration, brandingInfo) {
       "shadowcolor=black:shadowx=3:shadowy=3",
     "fade=t=in:st=0:d=0.35",
     `fade=t=out:st=${Math.max(duration - 0.35, 0).toFixed(2)}:d=0.35`,
-    "format=yuv420p",
   ].join(",");
+
+  const videoFilter =
+    `[0:v]${cardFilter}[base];` +
+    createBrandingLogoFilter(
+      isIntro ? 280 : 235,
+      isIntro ? "h*0.13" : "h*0.18"
+    ) +
+    ";[branded]format=yuv420p";
 
   const ffmpegArguments = [
     "-y",
@@ -565,7 +612,9 @@ async function createBrandingClip(type, duration, brandingInfo) {
     "lavfi",
     "-i",
     `color=c=black:s=1080x1920:r=30:d=${duration.toFixed(2)}`,
-    "-vf",
+    "-i",
+    logoPath,
+    "-filter_complex",
     videoFilter,
     "-an",
     "-c:v",
@@ -951,6 +1000,11 @@ async function generateVideo(
     checkRequiredFile(
       backgroundMusicPath,
       "horror_background.mp3"
+    );
+
+    checkRequiredFile(
+      logoPath,
+      "assets/branding/logo.png"
     );
 
     const sceneImagePaths =
