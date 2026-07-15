@@ -53,6 +53,22 @@ const INTRO_DURATION = 3.5;
 const CLASSIFIED_SCREEN_DURATION = 2.0;
 const OUTRO_DURATION = 2.0;
 
+const printedProgressMessages = new Set();
+
+function resetProgressMessages() {
+  printedProgressMessages.clear();
+}
+
+function printProgressMessageOnce(progressMessage) {
+  if (
+    progressMessage &&
+    !printedProgressMessages.has(progressMessage)
+  ) {
+    console.log(progressMessage);
+    printedProgressMessages.add(progressMessage);
+  }
+}
+
 function checkRequiredFile(filePath, fileName) {
   if (!fs.existsSync(filePath)) {
     throw new Error(
@@ -78,16 +94,8 @@ function runCommand(
     );
 
     let errorOutput = "";
-    let hasPrintedProgressMessage = false;
 
-    function printProgressMessageOnce() {
-      if (progressMessage && !hasPrintedProgressMessage) {
-        console.log(progressMessage);
-        hasPrintedProgressMessage = true;
-      }
-    }
-
-    printProgressMessageOnce();
+    printProgressMessageOnce(progressMessage);
 
     childProcess.stderr.on("data", (data) => {
       errorOutput += data.toString();
@@ -1162,6 +1170,8 @@ function findSceneImages() {
 async function generateVideo(
   suppliedSceneImagePaths = []
 ) {
+  resetProgressMessages();
+
   try {
     if (!fs.existsSync(outputFolder)) {
       fs.mkdirSync(
