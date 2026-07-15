@@ -13,22 +13,44 @@ function formatResponseBody(data) {
   }
 }
 
+function describeHttpStatus(status) {
+  if (status === 200) {
+    return "HTTP 200: OpenRouter accepted the request and returned a completion response.";
+  }
+
+  if (status === 401) {
+    return "HTTP 401: OpenRouter rejected the request as unauthenticated. Verify the API key value configured on the machine running the app.";
+  }
+
+  if (status === 403) {
+    return "HTTP 403: OpenRouter authenticated the request but refused access. Check account access, credits/quota, and whether the selected model is allowed for this account.";
+  }
+
+  if (status === 429) {
+    return "HTTP 429: OpenRouter rate-limited the request or quota is exhausted. Wait before retrying or review account rate limits/credits.";
+  }
+
+  if (status >= 400 && status < 500) {
+    return `HTTP ${status}: OpenRouter rejected the request. Review the response body for request or account details.`;
+  }
+
+  if (status >= 500) {
+    return `HTTP ${status}: OpenRouter returned a server-side error. Retry later or check OpenRouter service status.`;
+  }
+
+  return "No OpenRouter HTTP response was received. This points to networking, DNS, timeout, or TLS issues before OpenRouter returned a status code.";
+}
+
 function createApiError(error, moduleName, url, model) {
   const status = error.response?.status;
   const responseBody = formatResponseBody(error.response?.data || error.message);
-  const hasApiKey = Boolean(process.env.OPENROUTER_API_KEY);
   const message = [
     `OpenRouter request failed in ${moduleName}.`,
     `API URL: ${url}`,
     `Model: ${model}`,
     `HTTP status: ${status || "NO_RESPONSE"}`,
-    `API key configured: ${hasApiKey ? "yes" : "no"}`,
-    `Authorization header: Bearer ${hasApiKey ? "<OPENROUTER_API_KEY>" : "<missing>"}`,
-    `Content-Type header: application/json`,
-    `HTTP-Referer header: ${process.env.OPENROUTER_SITE_URL || "https://midnightos.local"}`,
-    `X-Title header: ${process.env.OPENROUTER_APP_TITLE || "MidnightOS"}`,
     `Response body: ${responseBody || "<empty>"}`,
-    `Diagnosis: HTTP 403 means OpenRouter accepted the endpoint but refused authorization for this request. Check that OPENROUTER_API_KEY is valid, the account has credits or free-model quota, and the model slug is enabled for the key/account. The old deepseek/deepseek-chat-v3-0324 slug can be unavailable or access-restricted; the production default is now deepseek/deepseek-chat.`,
+    `Diagnosis: ${describeHttpStatus(status)}`,
   ].join("\n");
 
   const apiError = new Error(message);
@@ -42,12 +64,6 @@ function createApiError(error, moduleName, url, model) {
 }
 
 async function requestChatCompletion({ moduleName, payload, timeout = 120000 }) {
-  if (!process.env.OPENROUTER_API_KEY) {
-    throw new Error(
-      `OpenRouter API key missing in ${moduleName}. Set OPENROUTER_API_KEY before running production mode.`
-    );
-  }
-
   const model = payload.model || process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
   const url = process.env.OPENROUTER_API_URL || OPENROUTER_API_URL;
   const requestPayload = { ...payload, model };
@@ -62,6 +78,10 @@ async function requestChatCompletion({ moduleName, payload, timeout = 120000 }) 
       },
       timeout,
     });
+
+    console.info(
+      `OpenRouter request completed in ${moduleName}. HTTP status: ${response.status}. Model: ${model}`
+    );
 
     return response.data?.choices?.[0]?.message?.content?.trim() || "";
   } catch (error) {
