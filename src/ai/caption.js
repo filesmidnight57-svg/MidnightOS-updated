@@ -1,13 +1,7 @@
 const { DEFAULT_MODEL, requestChatCompletion } = require("./openrouterClient");
 
-function createFallbackCaption(story) {
-  const hook = String(story || "").split(/[।.!?]/)[0].trim();
-  return `${hook || "Ek classified horror case phir khul gaya."}\n\nKya aap ending tak sach samajh paaye? Comment karo aur MidnightOS ko follow karo.`;
-}
-
 async function generateCaption(story) {
-  try {
-    return await requestChatCompletion({
+  return requestChatCompletion({
       moduleName: "src/ai/caption.js",
       payload: {
         model: process.env.OPENROUTER_MODEL || DEFAULT_MODEL,
@@ -27,11 +21,6 @@ Return only the caption.`,
         ],
       },
     });
-  } catch (error) {
-    console.warn(error.message);
-    console.warn("⚠️ OpenRouter configuration failed. Using deterministic offline caption so the pipeline can continue.");
-    return createFallbackCaption(story);
-  }
 }
 
 module.exports = generateCaption;
