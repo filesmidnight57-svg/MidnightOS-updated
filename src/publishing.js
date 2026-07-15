@@ -57,8 +57,26 @@ function readJson(outputDir, fileName) {
   return JSON.parse(readText(outputDir, fileName));
 }
 
+function hasUnicodeMojibake(text) {
+  return /(?:à¤|à¥|Ã|Â|â|ðŸ)/.test(String(text || ""));
+}
+
+function repairUnicodeMojibake(text) {
+  const value = String(text || "");
+  if (!hasUnicodeMojibake(value)) return value;
+
+  const latin1Text = value.replace(/[\u20ac\u201a\u0192\u201e\u2026\u2020\u2021\u02c6\u2030\u0160\u2039\u0152\u017d\u2018\u2019\u201c\u201d\u2022\u2013\u2014\u02dc\u2122\u0161\u203a\u0153\u017e\u0178]/g, (char) => String.fromCharCode({
+    "€": 0x80, "‚": 0x82, "ƒ": 0x83, "„": 0x84, "…": 0x85, "†": 0x86, "‡": 0x87,
+    "ˆ": 0x88, "‰": 0x89, "Š": 0x8a, "‹": 0x8b, "Œ": 0x8c, "Ž": 0x8e, "‘": 0x91,
+    "’": 0x92, "“": 0x93, "”": 0x94, "•": 0x95, "–": 0x96, "—": 0x97, "˜": 0x98,
+    "™": 0x99, "š": 0x9a, "›": 0x9b, "œ": 0x9c, "ž": 0x9e, "Ÿ": 0x9f,
+  }[char]));
+
+  return Buffer.from(latin1Text, "latin1").toString("utf8");
+}
+
 function normalizeSpaces(text) {
-  return String(text || "").replace(/\s+/g, " ").trim();
+  return repairUnicodeMojibake(text).replace(/\s+/g, " ").trim();
 }
 
 function getCaseLabel(directorPlan) {
@@ -262,13 +280,13 @@ function writeJson(filePath, data) {
 function generatePublishingPack(outputDir) {
   const story = readText(outputDir, "story.txt");
   const directorPlan = readJson(outputDir, "director.json");
-  const caption = readText(outputDir, "caption.txt");
-  const hashtags = readText(outputDir, "hashtags.txt");
+  const caption = repairUnicodeMojibake(readText(outputDir, "caption.txt"));
+  const hashtags = repairUnicodeMojibake(readText(outputDir, "hashtags.txt"));
 
-  const title = createTitle(directorPlan, story);
-  const description = createDescription(title, caption, hashtags);
-  const tags = createTags(directorPlan, story);
-  const pinnedComment = createPinnedComment(title);
+  const title = repairUnicodeMojibake(createTitle(directorPlan, story));
+  const description = repairUnicodeMojibake(createDescription(title, caption, hashtags));
+  const tags = createTags(directorPlan, story).map((tag) => repairUnicodeMojibake(tag));
+  const pinnedComment = repairUnicodeMojibake(createPinnedComment(title));
   const thumbnailText = buildThumbnailText(directorPlan, story);
 
   createThumbnail(path.join(outputDir, "thumbnail.png"), thumbnailText);
