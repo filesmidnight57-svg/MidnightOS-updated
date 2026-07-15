@@ -49,7 +49,8 @@ const directorPath = path.join(
   "director.json"
 );
 
-const INTRO_DURATION = 2.0;
+const INTRO_DURATION = 3.5;
+const CLASSIFIED_SCREEN_DURATION = 2.0;
 const OUTRO_DURATION = 2.0;
 
 function checkRequiredFile(filePath, fileName) {
@@ -421,8 +422,8 @@ function createSceneBaseFilter(
 }
 
 function createLogoOverlayFilter(
-  size = 170,
-  opacity = 0.32,
+  size = 102,
+  opacity = 0.35,
   margin = 46
 ) {
   return (
@@ -563,57 +564,128 @@ function getBrandingInfo() {
   }
 }
 
+function createIntroFilter(duration) {
+  const fadeOutStart = Math.max(duration - 0.55, 0).toFixed(2);
+
+  return (
+    "[0:v]format=rgba[base];" +
+    "[1:v]scale=360:-1,format=rgba," +
+    "colorchannelmixer=aa='if(lt(t,0.65),0,min(1,(t-0.65)/0.9))*if(gte(t," +
+      fadeOutStart +
+      "),max(0,1-(t-" +
+      fadeOutStart +
+      ")/0.55),1)'[logo];" +
+    "[logo]split=2[sharp][glowseed];" +
+    "[glowseed]boxblur=22:2,colorchannelmixer=aa=0.46[glow];" +
+    "[base][glow]overlay=x=(W-w)/2:y=h*0.22:format=auto[withglow];" +
+    "[withglow][sharp]overlay=x=(W-w)/2+if(between(t,2.22,2.30),-10,if(between(t,2.30,2.38),8,0)):" +
+      "y=h*0.22:format=auto[logod];" +
+    "[logod]drawtext=font='Arial':text='MIDNIGHTOS':fontcolor=white:" +
+      "fontsize=88:x=(w-text_w)/2:y=h*0.48:shadowcolor=0x1b4d5cff:shadowx=0:shadowy=0:" +
+      "alpha='if(lt(t,1.05),0,min(1,(t-1.05)/0.75))*if(gte(t," +
+      fadeOutStart +
+      "),max(0,1-(t-" +
+      fadeOutStart +
+      ")/0.55),1)'[title];" +
+    "[title]drawtext=font='Arial':text='CLASSIFIED CASE FILE':fontcolor=0xb8c7d9:" +
+      "fontsize=38:x=(w-text_w)/2:y=h*0.555:letter_spacing=6:" +
+      "alpha='if(lt(t,1.35),0,min(1,(t-1.35)/0.65))*if(gte(t," +
+      fadeOutStart +
+      "),max(0,1-(t-" +
+      fadeOutStart +
+      ")/0.55),1)'[texted];" +
+    "[texted]drawbox=x=0:y=h*0.53:w=w:h=4:color=0x9ad7ffff@0.25:" +
+      "enable='between(t,2.22,2.32)'[glitch1];" +
+    "[glitch1]drawbox=x=0:y=h*0.49:w=w:h=2:color=white@0.28:" +
+      "enable='between(t,2.33,2.40)',fade=t=in:st=0:d=0.45," +
+      "fade=t=out:st=" +
+      fadeOutStart +
+      ":d=0.55,format=yuv420p"
+  );
+}
+
+function buildClassifiedCardFilter(duration, brandingInfo) {
+  const fadeOutStart = Math.max(duration - 0.35, 0).toFixed(2);
+
+  return [
+    "drawtext=font='Arial':" +
+      `text='${brandingInfo.caseNumber}':` +
+      "fontcolor=0xd8e6f5:fontsize=54:x=(w-text_w)/2:y=h*0.34:letter_spacing=3",
+    "drawtext=font='Arial':text='STATUS\\:':fontcolor=0x8fa3b8:fontsize=34:x=w*0.20:y=h*0.455:letter_spacing=4",
+    "drawtext=font='Arial':text='CLASSIFIED':fontcolor=white:fontsize=56:x=w*0.20:y=h*0.495:letter_spacing=5",
+    "drawtext=font='Arial':text='ACCESS LEVEL\\:':fontcolor=0x8fa3b8:fontsize=34:x=w*0.20:y=h*0.615:letter_spacing=4",
+    "drawtext=font='Arial':text='RESTRICTED':fontcolor=white:fontsize=56:x=w*0.20:y=h*0.655:letter_spacing=5",
+    "drawbox=x=w*0.14:y=h*0.29:w=w*0.72:h=h*0.46:color=0x101820@0.28:t=3",
+    "fade=t=in:st=0:d=0.35",
+    `fade=t=out:st=${fadeOutStart}:d=0.35`,
+    "format=yuv420p",
+  ].join(",");
+}
+
 async function createBrandingClip(type, duration, brandingInfo) {
   const isIntro = type === "intro";
+  const isClassified = type === "classified";
   const clipName = isIntro
     ? "intro_card.mp4"
-    : "outro_card.mp4";
+    : isClassified
+      ? "classified_card.mp4"
+      : "outro_card.mp4";
   const clipPath = path.join(temporaryFolder, clipName);
 
-  const firstLine = isIntro ? "MIDNIGHTOS" : "CASE STATUS";
-  const secondLine = isIntro
-    ? "CLASSIFIED CASE FILE"
-    : brandingInfo.status;
-  const thirdLine = isIntro
-    ? brandingInfo.caseNumber
-    : "FOLLOW FOR NEXT CASE";
+  let videoFilter;
+  let inputArguments;
 
-  const cardFilter = [
-    "drawtext=font='Arial':" +
-      `text='${firstLine}':` +
-      "fontcolor=white:fontsize=82:" +
-      "x=(w-text_w)/2:y=h*0.37:" +
-      "shadowcolor=black:shadowx=4:shadowy=4",
-    "drawtext=font='Arial':" +
-      `text='${secondLine}':` +
-      "fontcolor=white:fontsize=48:" +
-      "x=(w-text_w)/2:y=h*0.49:" +
-      "shadowcolor=black:shadowx=3:shadowy=3",
-    "drawtext=font='Arial':" +
-      `text='${thirdLine}':` +
-      "fontcolor=white:fontsize=42:" +
-      "x=(w-text_w)/2:y=h*0.59:" +
-      "shadowcolor=black:shadowx=3:shadowy=3",
-    "fade=t=in:st=0:d=0.35",
-    `fade=t=out:st=${Math.max(duration - 0.35, 0).toFixed(2)}:d=0.35`,
-  ].join(",");
+  if (isIntro) {
+    videoFilter = createIntroFilter(duration);
+    inputArguments = [
+      "-f",
+      "lavfi",
+      "-i",
+      `color=c=black:s=1080x1920:r=30:d=${duration.toFixed(2)}`,
+      "-loop",
+      "1",
+      "-i",
+      logoPath,
+      "-t",
+      duration.toFixed(2),
+    ];
+  } else {
+    const firstLine = isClassified ? "CASE CLOSED" : "CASE CLOSED";
+    const secondLine = isClassified ? "" : "FOLLOW FOR NEXT CASE";
+    const cardFilter = isClassified
+      ? buildClassifiedCardFilter(duration, brandingInfo)
+      : [
+          "drawtext=font='Arial':" +
+            `text='${firstLine}':` +
+            "fontcolor=white:fontsize=78:" +
+            "x=(w-text_w)/2:y=h*0.42:letter_spacing=5:" +
+            "shadowcolor=black:shadowx=4:shadowy=4",
+          "drawtext=font='Arial':" +
+            `text='${secondLine}':` +
+            "fontcolor=0xb8c7d9:fontsize=42:" +
+            "x=(w-text_w)/2:y=h*0.52:letter_spacing=3:" +
+            "shadowcolor=black:shadowx=3:shadowy=3",
+          "fade=t=in:st=0:d=0.35",
+          `fade=t=out:st=${Math.max(duration - 0.35, 0).toFixed(2)}:d=0.35`,
+        ].join(",");
 
-  const videoFilter =
-    `[0:v]${cardFilter}[base];` +
-    createBrandingLogoFilter(
-      isIntro ? 280 : 235,
-      isIntro ? "h*0.13" : "h*0.18"
-    ) +
-    ";[branded]format=yuv420p";
+    videoFilter =
+      `[0:v]${cardFilter}[base];` +
+      createBrandingLogoFilter(210, isClassified ? "h*0.14" : "h*0.22", isClassified ? 0.45 : 0.8) +
+      ";[branded]format=yuv420p";
+    inputArguments = [
+      "-f",
+      "lavfi",
+      "-i",
+      `color=c=black:s=1080x1920:r=30:d=${duration.toFixed(2)}`,
+      "-i",
+      logoPath,
+    ];
+  }
 
   const ffmpegArguments = [
     "-y",
-    "-f",
-    "lavfi",
-    "-i",
-    `color=c=black:s=1080x1920:r=30:d=${duration.toFixed(2)}`,
-    "-i",
-    logoPath,
+    ...inputArguments,
     "-filter_complex",
     videoFilter,
     "-an",
@@ -636,8 +708,10 @@ async function createBrandingClip(type, duration, brandingInfo) {
     "ffmpeg",
     ffmpegArguments,
     isIntro
-      ? "🎬 Creating MidnightOS intro..."
-      : "📁 Creating case-status outro..."
+      ? "🎬 Creating premium MidnightOS intro..."
+      : isClassified
+        ? "🔐 Creating classified access screen..."
+        : "📁 Creating cinematic case-closed outro..."
   );
 
   checkRequiredFile(clipPath, clipName);
@@ -716,6 +790,18 @@ function buildSoundEffectInputs(
 ) {
   const effectInputs = [];
 
+  ffmpegArguments.push(
+    "-f",
+    "lavfi",
+    "-i",
+    "sine=frequency=38:duration=0.75:sample_rate=44100"
+  );
+
+  effectInputs.push({
+    type: "intro",
+    inputIndex: 3,
+  });
+
   for (
     let index = 1;
     index < sceneCount;
@@ -730,7 +816,7 @@ function buildSoundEffectInputs(
 
     effectInputs.push({
       type: "transition",
-      inputIndex: index + 2,
+      inputIndex: index + 3,
       sceneBoundary: index,
     });
   }
@@ -744,7 +830,7 @@ function buildSoundEffectInputs(
 
   effectInputs.push({
     type: "final",
-    inputIndex: sceneCount + 2,
+    inputIndex: sceneCount + 3,
   });
 
   return effectInputs;
@@ -775,6 +861,22 @@ function buildAudioFilter(
   ];
 
   let transitionNumber = 1;
+
+  const introEffect = effectInputs.find(
+    (effect) => effect.type === "intro"
+  );
+
+  if (introEffect) {
+    filters.push(
+      `[${introEffect.inputIndex}:a]` +
+        "volume=0.42," +
+        "lowpass=f=180," +
+        "afade=t=out:st=0.05:d=0.70" +
+        "[introhit]"
+    );
+
+    mixedTracks.push("[introhit]");
+  }
 
   for (const effect of effectInputs) {
     if (effect.type === "transition") {
@@ -1056,6 +1158,12 @@ async function generateVideo(
       brandingInfo
     );
 
+    const classifiedClipPath = await createBrandingClip(
+      "classified",
+      CLASSIFIED_SCREEN_DURATION,
+      brandingInfo
+    );
+
     const sceneClipPaths = [];
 
     for (
@@ -1082,6 +1190,7 @@ async function generateVideo(
     const combinedVideoPath =
       await combineSceneClips([
         introClipPath,
+        classifiedClipPath,
         ...sceneClipPaths,
         outroClipPath,
       ]);
@@ -1091,7 +1200,7 @@ async function generateVideo(
       sceneImagePaths.length,
       sceneDuration,
       audioDuration,
-      INTRO_DURATION,
+      INTRO_DURATION + CLASSIFIED_SCREEN_DURATION,
       OUTRO_DURATION
     );
 
@@ -1119,11 +1228,15 @@ async function generateVideo(
     );
 
     console.log(
-      "🎬 MidnightOS Intro Added"
+      "🎬 Premium MidnightOS Intro Added"
     );
 
     console.log(
-      "📁 Case Status Outro Added"
+      "🔐 Classified Access Screen Added"
+    );
+
+    console.log(
+      "📁 Case-Closed Outro Added"
     );
 
     console.log(
