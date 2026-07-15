@@ -1,4 +1,4 @@
-const axios = require("axios");
+const { DEFAULT_MODEL, requestChatCompletion } = require("./openrouterClient");
 
 function cleanJsonResponse(content) {
   return content
@@ -8,10 +8,10 @@ function cleanJsonResponse(content) {
 }
 
 async function generateScenes(story) {
-  const response = await axios.post(
-    "https://openrouter.ai/api/v1/chat/completions",
-    {
-      model: "deepseek/deepseek-chat-v3-0324",
+  const rawContent = await requestChatCompletion({
+    moduleName: "src/ai/scenes.js",
+    payload: {
+      model: process.env.OPENROUTER_MODEL || DEFAULT_MODEL,
       max_tokens: 1800,
       temperature: 0.75,
       messages: [
@@ -74,17 +74,8 @@ Important:
         },
       ],
     },
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      timeout: 120000,
-    }
-  );
-
-  const rawContent =
-    response.data?.choices?.[0]?.message?.content?.trim();
+    timeout: 120000,
+  });
 
   if (!rawContent) {
     throw new Error("AI ne scenes return nahi kiye.");

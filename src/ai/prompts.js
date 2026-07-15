@@ -1,10 +1,10 @@
-const axios = require("axios");
+const { DEFAULT_MODEL, requestChatCompletion } = require("./openrouterClient");
 
 async function generatePrompt(story) {
-  const response = await axios.post(
-    "https://openrouter.ai/api/v1/chat/completions",
-    {
-      model: "deepseek/deepseek-chat-v3-0324",
+  return requestChatCompletion({
+    moduleName: "src/ai/prompts.js",
+    payload: {
+      model: process.env.OPENROUTER_MODEL || DEFAULT_MODEL,
       max_tokens: 250,
       temperature: 0.8,
       messages: [
@@ -25,15 +25,7 @@ Return only the image prompt.`,
         },
       ],
     },
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  return response.data.choices[0].message.content;
+  });
 }
 
 module.exports = generatePrompt;

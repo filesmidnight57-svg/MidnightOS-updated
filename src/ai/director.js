@@ -140,47 +140,6 @@ function normalizeImagePrompt(prompt) {
   return truncateText(`${shortened}${requiredEnding}`, IMAGE_PROMPT_MAX_LENGTH);
 }
 
-function createFallbackDirectorPlan(story) {
-  const shortStory = truncateText(story.replace(/\s+/g, " ").trim(), 260) || "Hindi horror investigation";
-  const mainCharacter = getMainCharacter();
-  const characterPrompt = mainCharacter.consistencyPrompt;
-  const location = "a dark Indian neighborhood with narrow lanes, damp concrete walls, weak tube lights, and heavy night fog";
-
-  return validateDirectorPlan({
-    caseInfo: {
-      caseNumber: "CASE #0001",
-      caseTitle: "Adhoori Raat Ka Case",
-      location: "India",
-      evidenceType: "Police Bodycam",
-      status: "CLASSIFIED",
-    },
-    mainCharacter,
-    visualBible: {
-      genre: "Found footage psychological horror",
-      aspectRatio: "9:16 vertical",
-      overallStyle: "Ultra-realistic cinematic Indian horror",
-      colorPalette: "Cold blue, desaturated grey and deep black",
-      filmTexture: "Subtle film grain",
-      lightingStyle: "Low-key practical lighting",
-      locationContinuity: location,
-      negativePrompt: "cartoon, illustration, anime, distorted anatomy, extra fingers, duplicate people, text, captions, subtitles, watermark, logo",
-    },
-    scenes: Array.from({ length: 6 }, (_, index) => ({
-      sceneNumber: index + 1,
-      title: `Scene ${index + 1}`,
-      storyMoment: index === 0 ? shortStory : `Investigation beat ${index + 1} from the case`,
-      cameraShot: ["CCTV wide shot", "bodycam POV", "close-up", "handheld tracking shot", "over-the-shoulder shot", "extreme close-up"][index],
-      cameraMovement: ["locked CCTV frame", "slow push-in", "slow pan", "handheld shake", "tracking shot", "sudden still frame"][index],
-      lens: ["24mm", "35mm", "50mm", "35mm", "85mm", "50mm"][index],
-      lighting: "Low-key practical lighting with weak tube light spill and deep shadows",
-      mood: "Psychological horror tension",
-      colorGrade: "Cold blue desaturated cinematic grade",
-      soundSuggestion: ["radio static", "footsteps", "door creak", "whisper", "heartbeat", "wind"][index],
-      imagePrompt: `${characterPrompt} Scene ${index + 1} in ${location}, ${shortStory}, cinematic horror investigation, vertical 9:16 composition, ultra-realistic cinematic horror, no text, no captions, no logo, no watermark.`,
-    })),
-  });
-}
-
 function validateDirectorPlan(plan) {
   if (!plan || typeof plan !== "object") {
     throw new Error("Director plan valid object nahi hai.");
@@ -327,10 +286,9 @@ async function generateDirectorPlan(story) {
     }
   }
 
-  console.warn(
-    `⚠️ Director JSON recovery failed after ${attempts.length} attempts. Using safe fallback plan instead of crashing. Last error: ${lastError?.message || "unknown error"}`
+  throw new Error(
+    `Director JSON recovery failed after ${attempts.length} attempts. Last error: ${lastError?.message || "unknown error"}`
   );
-  return createFallbackDirectorPlan(story);
 }
 
 module.exports = generateDirectorPlan;
