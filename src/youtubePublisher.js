@@ -190,6 +190,7 @@ function createMultipartBody(metadata, filePath, contentType, fileFieldName) {
 }
 
 async function uploadLive(inputs) {
+  console.log("🚀 Upload Started");
   const accessToken = await getAccessToken();
   const metadata = {
     snippet: {
@@ -203,6 +204,8 @@ async function uploadLive(inputs) {
       selfDeclaredMadeForKids: false,
     },
   };
+
+  console.log("📤 Uploading Video...");
 
   const startResponse = await requestJson("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", {
     method: "POST",
@@ -229,6 +232,12 @@ async function uploadLive(inputs) {
   }, fs.createReadStream(inputs.files.video.path));
 
   const videoId = insertResponse.data.id;
+  if (!videoId) {
+    throw new Error("YouTube upload did not return a video ID.");
+  }
+
+  console.log("🖼 Uploading Thumbnail...");
+
   const thumbnailMultipart = createMultipartBody({}, inputs.files.thumbnail.path, "image/png", "media");
 
   await requestJson(`https://www.googleapis.com/upload/youtube/v3/thumbnails/set?uploadType=multipart&videoId=${encodeURIComponent(videoId)}`, {
@@ -240,10 +249,14 @@ async function uploadLive(inputs) {
     },
   }, thumbnailMultipart.body);
 
+  const videoUrl = `https://www.youtube.com/shorts/${videoId}`;
+  console.log("✅ Upload Complete");
+  console.log(`🔗 Video URL: ${videoUrl}`);
+
   return {
     uploaded: true,
     videoId,
-    url: `https://www.youtube.com/shorts/${videoId}`,
+    url: videoUrl,
     apiResponseStatus: insertResponse.statusCode,
   };
 }
@@ -295,6 +308,7 @@ async function publishYouTubeShorts(options = {}) {
     platform: "youtube",
     format: "shorts",
     uploaded: result.uploaded,
+    ...(result.url ? { videoUrl: result.url } : {}),
     privacyStatus: inputs.metadata.privacyStatus,
     metadata: inputs.metadata,
     files: {
@@ -306,7 +320,7 @@ async function publishYouTubeShorts(options = {}) {
   };
 
   const reportPath = writeUploadReport(outputDir, report);
-  return { reportPath, report };
+  return { reportPath, report, videoUrl: report.videoUrl };
 }
 
 if (require.main === module) {
@@ -315,6 +329,7 @@ if (require.main === module) {
       console.log(`✅ YouTube Publisher finished in ${report.mode} mode.`);
       console.log(`📝 Upload report saved: ${reportPath}`);
       if (report.mode === "dry-run") console.log("🧪 No upload was performed.");
+      if (report.videoUrl) console.log(`🔗 Video URL: ${report.videoUrl}`);
     })
     .catch((error) => {
       console.error(`❌ YouTube Publisher failed: ${error.message}`);
