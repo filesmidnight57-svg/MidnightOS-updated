@@ -78,10 +78,16 @@ function runCommand(
     );
 
     let errorOutput = "";
+    let hasPrintedProgressMessage = false;
 
-    if (progressMessage) {
-      console.log(progressMessage);
+    function printProgressMessageOnce() {
+      if (progressMessage && !hasPrintedProgressMessage) {
+        console.log(progressMessage);
+        hasPrintedProgressMessage = true;
+      }
     }
+
+    printProgressMessageOnce();
 
     childProcess.stderr.on("data", (data) => {
       errorOutput += data.toString();
