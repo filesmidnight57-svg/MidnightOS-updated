@@ -1,15 +1,192 @@
 const axios = require("axios");
 
-function cleanJsonResponse(content) {
+const DIRECTOR_MODEL = "deepseek/deepseek-chat-v3-0324";
+const DIRECTOR_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+const IMAGE_PROMPT_MAX_LENGTH = 900;
+
+function logDirectorJsonFailure(reason, detail) {
+  const safeDetail = detail ? ` ${detail}` : "";
+  console.warn(`⚠️ Director JSON parse failed: ${reason}.${safeDetail}`);
+}
+
+function stripCodeFence(content) {
+  const trimmed = content.trim();
+  const fenced = trimmed.match(/^```(?:json|javascript|js)?\s*([\s\S]*?)\s*```$/i);
+  return fenced ? fenced[1].trim() : trimmed;
+}
+
+function extractJsonResponse(content) {
   if (!content || typeof content !== "string") {
     return "";
   }
 
-  return content
-    .replace(/```json/gi, "")
-    .replace(/```javascript/gi, "")
-    .replace(/```/g, "")
-    .trim();
+  const unfenced = stripCodeFence(content);
+  const firstObject = unfenced.indexOf("{");
+  const firstArray = unfenced.indexOf("[");
+  const starts = [firstObject, firstArray].filter((index) => index !== -1);
+
+  if (starts.length === 0) {
+    return unfenced.trim();
+  }
+
+  const start = Math.min(...starts);
+  const openChar = unfenced[start];
+  const closeChar = openChar === "{" ? "}" : "]";
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let index = start; index < unfenced.length; index += 1) {
+    const char = unfenced[index];
+
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+
+    if (char === "\\" && inString) {
+      escaped = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) {
+      continue;
+    }
+
+    if (char === openChar) {
+      depth += 1;
+    } else if (char === closeChar) {
+      depth -= 1;
+      if (depth === 0) {
+        return unfenced.slice(start, index + 1).trim();
+      }
+    }
+  }
+
+  return unfenced.slice(start).trim();
+}
+
+function isProbablyIncompleteJson(jsonText, parseError) {
+  if (!jsonText) {
+    return false;
+  }
+
+  const message = parseError?.message || "";
+  if (/unterminated|string|unexpected end|end of json|bad control character/i.test(message)) {
+    return true;
+  }
+
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (const char of jsonText) {
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+
+    if (char === "\\" && inString) {
+      escaped = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) {
+      continue;
+    }
+
+    if (char === "{" || char === "[") {
+      depth += 1;
+    } else if (char === "}" || char === "]") {
+      depth -= 1;
+    }
+  }
+
+  return inString || depth > 0;
+}
+
+function truncateText(value, maxLength) {
+  if (typeof value !== "string" || value.length <= maxLength) {
+    return value;
+  }
+
+  return value.slice(0, maxLength - 1).trimEnd();
+}
+
+function normalizeImagePrompt(prompt) {
+  const safePrompt = typeof prompt === "string" ? prompt.trim() : "";
+  const requiredEnding = " vertical 9:16 composition, ultra-realistic cinematic horror, no text, no captions, no logo, no watermark.";
+  const availableLength = IMAGE_PROMPT_MAX_LENGTH - requiredEnding.length;
+  const shortened = truncateText(safePrompt, Math.max(120, availableLength));
+
+  if (/vertical 9:16/i.test(shortened) && /no text/i.test(shortened)) {
+    return truncateText(shortened, IMAGE_PROMPT_MAX_LENGTH);
+  }
+
+  return truncateText(`${shortened}${requiredEnding}`, IMAGE_PROMPT_MAX_LENGTH);
+}
+
+function createFallbackDirectorPlan(story) {
+  const shortStory = truncateText(story.replace(/\s+/g, " ").trim(), 260) || "Hindi horror investigation";
+  const characterPrompt = "Indian investigator in his late thirties with a tired oval face, short black hair, light stubble, average build, khaki field jacket, dark shirt, and a small flashlight.";
+  const location = "a dark Indian neighborhood with narrow lanes, damp concrete walls, weak tube lights, and heavy night fog";
+
+  return validateDirectorPlan({
+    caseInfo: {
+      caseNumber: "CASE #0001",
+      caseTitle: "Adhoori Raat Ka Case",
+      location: "India",
+      evidenceType: "Police Bodycam",
+      status: "CLASSIFIED",
+    },
+    mainCharacter: {
+      name: "Investigator",
+      age: 38,
+      gender: "male",
+      nationality: "Indian",
+      role: "investigator",
+      faceDescription: "Tired oval face with tense eyes and realistic Indian features",
+      hair: "Short black hair",
+      facialHair: "Light stubble",
+      bodyBuild: "Average build",
+      clothing: "Khaki field jacket over a dark shirt",
+      accessories: "Small flashlight",
+      consistencyPrompt: characterPrompt,
+    },
+    visualBible: {
+      genre: "Found footage psychological horror",
+      aspectRatio: "9:16 vertical",
+      overallStyle: "Ultra-realistic cinematic Indian horror",
+      colorPalette: "Cold blue, desaturated grey and deep black",
+      filmTexture: "Subtle film grain",
+      lightingStyle: "Low-key practical lighting",
+      locationContinuity: location,
+      negativePrompt: "cartoon, illustration, anime, distorted anatomy, extra fingers, duplicate people, text, captions, subtitles, watermark, logo",
+    },
+    scenes: Array.from({ length: 6 }, (_, index) => ({
+      sceneNumber: index + 1,
+      title: `Scene ${index + 1}`,
+      storyMoment: index === 0 ? shortStory : `Investigation beat ${index + 1} from the case`,
+      cameraShot: ["CCTV wide shot", "bodycam POV", "close-up", "handheld tracking shot", "over-the-shoulder shot", "extreme close-up"][index],
+      cameraMovement: ["locked CCTV frame", "slow push-in", "slow pan", "handheld shake", "tracking shot", "sudden still frame"][index],
+      lens: ["24mm", "35mm", "50mm", "35mm", "85mm", "50mm"][index],
+      lighting: "Low-key practical lighting with weak tube light spill and deep shadows",
+      mood: "Psychological horror tension",
+      colorGrade: "Cold blue desaturated cinematic grade",
+      soundSuggestion: ["radio static", "footsteps", "door creak", "whisper", "heartbeat", "wind"][index],
+      imagePrompt: `${characterPrompt} Scene ${index + 1} in ${location}, ${shortStory}, cinematic horror investigation, vertical 9:16 composition, ultra-realistic cinematic horror, no text, no captions, no logo, no watermark.`,
+    })),
+  });
 }
 
 function validateDirectorPlan(plan) {
@@ -58,137 +235,41 @@ function validateDirectorPlan(plan) {
     scene.mood = scene.mood || "psychological horror";
     scene.colorGrade = scene.colorGrade || "cold blue cinematic grade";
     scene.soundSuggestion = scene.soundSuggestion || "dark ambient tension";
+    scene.imagePrompt = normalizeImagePrompt(scene.imagePrompt);
   });
 
   return plan;
 }
 
-async function generateDirectorPlan(story) {
-  if (!story || !story.trim()) {
-    throw new Error("Director AI ke liye story empty hai.");
-  }
+function buildDirectorMessages(story, mode = "normal") {
+  const shorter = mode === "short";
+  const imagePromptLimit = shorter ? 520 : IMAGE_PROMPT_MAX_LENGTH;
 
-  const response = await axios.post(
-    "https://openrouter.ai/api/v1/chat/completions",
+  return [
     {
-      model: "deepseek/deepseek-chat-v3-0324",
-      max_tokens: 3500,
-      temperature: 0.72,
-      messages: [
-        {
-          role: "system",
-          content: `
-You are the AI Director and Visual Continuity Supervisor for MidnightOS.
-
-MidnightOS creates realistic Hindi horror investigation videos presented like classified police cases.
-
-Your job is to transform one Hindi horror story into a professional director plan containing exactly 6 cinematic scenes.
-
-You must maintain visual continuity across all scenes.
-
-The same main character must always have:
-- the same age
-- the same gender
-- the same face description
-- the same hairstyle
-- the same facial hair
-- the same clothing
-- the same accessories
-- the same physical build
-
-Every scene must repeat the complete character description inside its imagePrompt.
-
-Return only valid JSON.
-Never return markdown.
-Never return explanations.
-Never return code fences.
-          `.trim(),
-        },
-        {
-          role: "user",
-          content: `
-Create a complete cinematic director plan for this Hindi horror case story:
-
-${story}
-
-Return exactly this JSON structure:
-
-{
-  "caseInfo": {
-    "caseNumber": "CASE #0001",
-    "caseTitle": "Short Hindi case title",
-    "location": "Indian location from the story",
-    "evidenceType": "CCTV Footage, Emergency Call, Voice Recording, Police Bodycam, Diary or other evidence",
-    "status": "UNSOLVED, CLASSIFIED or RESTRICTED"
-  },
-
-  "mainCharacter": {
-    "name": "Character name",
-    "age": 35,
-    "gender": "male or female",
-    "nationality": "Indian",
-    "role": "Police officer, investigator, victim or other role",
-    "faceDescription": "Detailed fixed facial description",
-    "hair": "Detailed fixed hairstyle",
-    "facialHair": "Detailed fixed facial hair or clean-shaven",
-    "bodyBuild": "Detailed fixed body build",
-    "clothing": "Detailed fixed clothing",
-    "accessories": "Detailed fixed accessories",
-    "consistencyPrompt": "One complete English sentence describing the exact same character appearance to repeat in every image"
-  },
-
-  "visualBible": {
-    "genre": "Found footage psychological horror",
-    "aspectRatio": "9:16 vertical",
-    "overallStyle": "Ultra-realistic cinematic Indian horror",
-    "colorPalette": "Cold blue, desaturated grey and deep black",
-    "filmTexture": "Subtle film grain",
-    "lightingStyle": "Low-key practical lighting",
-    "locationContinuity": "Detailed recurring location description",
-    "negativePrompt": "cartoon, illustration, anime, distorted anatomy, extra fingers, duplicate people, text, captions, subtitles, watermark, logo"
-  },
-
-  "scenes": [
+      role: "system",
+      content: [
+        "You are MidnightOS AI Director for realistic Hindi horror case videos.",
+        "Return only valid JSON, no markdown, no code fences, no explanations.",
+        "Keep the exact requested schema and exactly 6 scenes.",
+        `Each imagePrompt must be English and under ${imagePromptLimit} characters.`,
+      ].join(" "),
+    },
     {
-      "sceneNumber": 1,
-      "title": "Short Hindi title",
-      "storyMoment": "Exact Hindi story moment shown in this scene",
-      "cameraShot": "CCTV wide shot, close-up, POV, bodycam, handheld, over-the-shoulder, extreme close-up or aerial shot",
-      "cameraMovement": "Slow push-in, handheld shake, slow pan, tracking shot or locked CCTV frame",
-      "lens": "24mm, 35mm, 50mm or 85mm cinematic lens",
-      "lighting": "Detailed lighting description",
-      "mood": "Detailed emotional horror mood",
-      "colorGrade": "Detailed cinematic color grade",
-      "soundSuggestion": "Door creak, footsteps, thunder, whisper, heartbeat, wind, radio static or jump scare",
-      "imagePrompt": "One highly detailed English image-generation prompt"
-    }
-  ]
+      role: "user",
+      content: `Story:\n${story}\n\nReturn JSON with this exact schema: {"caseInfo":{"caseNumber":"CASE #0001","caseTitle":"Short Hindi case title","location":"Indian location","evidenceType":"CCTV Footage, Emergency Call, Voice Recording, Police Bodycam, Diary or other evidence","status":"UNSOLVED, CLASSIFIED or RESTRICTED"},"mainCharacter":{"name":"Character name","age":35,"gender":"male or female","nationality":"Indian","role":"role","faceDescription":"fixed face","hair":"fixed hair","facialHair":"fixed facial hair or clean-shaven","bodyBuild":"fixed build","clothing":"fixed clothing","accessories":"fixed accessories","consistencyPrompt":"one complete English sentence with exact same appearance"},"visualBible":{"genre":"Found footage psychological horror","aspectRatio":"9:16 vertical","overallStyle":"Ultra-realistic cinematic Indian horror","colorPalette":"Cold blue, desaturated grey and deep black","filmTexture":"Subtle film grain","lightingStyle":"Low-key practical lighting","locationContinuity":"recurring location description","negativePrompt":"cartoon, illustration, anime, distorted anatomy, extra fingers, duplicate people, text, captions, subtitles, watermark, logo"},"scenes":[{"sceneNumber":1,"title":"Short Hindi title","storyMoment":"Hindi story moment","cameraShot":"shot type","cameraMovement":"movement","lens":"24mm/35mm/50mm/85mm","lighting":"lighting","mood":"mood","colorGrade":"grade","soundSuggestion":"sound","imagePrompt":"English prompt"}]} Rules: scenes 1-6 = hook, investigation, first clue, danger, twist, unresolved ending. Use realistic Indian people/locations. Every imagePrompt must include the character consistency, recurring location, camera, lens, lighting, mood, color grade, vertical 9:16, ultra-realistic cinematic horror, no text/captions/logo/watermark. No readable signs/documents/messages.${shorter ? " Make all string values concise." : ""}`,
+    },
+  ];
 }
 
-Rules:
-
-- Generate exactly 6 scenes.
-- Every scene must advance the story.
-- Every scene must have a visibly different composition.
-- Scene 1 must create an immediate hook.
-- Scene 2 must introduce the investigation.
-- Scene 3 must reveal the first disturbing clue.
-- Scene 4 must intensify the danger.
-- Scene 5 must reveal a major twist.
-- Scene 6 must show the shocking unresolved ending.
-- Use realistic Indian people and Indian locations.
-- Every imagePrompt must be written only in English.
-- Every imagePrompt must include the full mainCharacter.consistencyPrompt.
-- Every imagePrompt must include the recurring location description.
-- Every imagePrompt must include camera shot, lens, lighting, mood and color grade.
-- Every imagePrompt must say vertical 9:16 composition.
-- Every imagePrompt must say ultra-realistic cinematic horror.
-- Every imagePrompt must say no text, no captions, no logo and no watermark.
-- Do not include readable signs, documents or written messages inside images.
-- Return only valid JSON.
-          `.trim(),
-        },
-      ],
+async function requestDirectorPlan(story, mode = "normal") {
+  const response = await axios.post(
+    DIRECTOR_API_URL,
+    {
+      model: DIRECTOR_MODEL,
+      max_tokens: mode === "short" ? 2200 : 3200,
+      temperature: mode === "short" ? 0.35 : 0.6,
+      messages: buildDirectorMessages(story, mode),
     },
     {
       headers: {
@@ -199,26 +280,60 @@ Rules:
     }
   );
 
-  const rawContent =
-    response.data?.choices?.[0]?.message?.content?.trim();
+  return response.data?.choices?.[0]?.message?.content?.trim() || "";
+}
 
+function parseDirectorResponse(rawContent) {
   if (!rawContent) {
     throw new Error("Director AI ne empty response diya.");
   }
 
-  const cleanedContent = cleanJsonResponse(rawContent);
-
-  let directorPlan;
+  const jsonContent = extractJsonResponse(rawContent);
 
   try {
-    directorPlan = JSON.parse(cleanedContent);
+    return validateDirectorPlan(JSON.parse(jsonContent));
   } catch (error) {
-    throw new Error(
-      `Director JSON parse nahi hua.\n\nAI Response:\n${rawContent}`
-    );
+    error.directorJson = jsonContent;
+    error.incompleteJson = isProbablyIncompleteJson(jsonContent, error);
+    throw error;
+  }
+}
+
+async function generateDirectorPlan(story) {
+  if (!story || !story.trim()) {
+    throw new Error("Director AI ke liye story empty hai.");
   }
 
-  return validateDirectorPlan(directorPlan);
+  const attempts = [
+    { mode: "normal", reason: "initial request" },
+    { mode: "normal", reason: "automatic retry after incomplete or malformed JSON" },
+    { mode: "short", reason: "short JSON recovery request" },
+  ];
+  let lastError;
+
+  for (const attempt of attempts) {
+    try {
+      const rawContent = await requestDirectorPlan(story, attempt.mode);
+      return parseDirectorResponse(rawContent);
+    } catch (error) {
+      lastError = error;
+      const detail = error.incompleteJson
+        ? "Response appears truncated or ended inside a JSON string."
+        : error.message;
+      logDirectorJsonFailure(attempt.reason, detail);
+    }
+  }
+
+  console.warn(
+    `⚠️ Director JSON recovery failed after ${attempts.length} attempts. Using safe fallback plan instead of crashing. Last error: ${lastError?.message || "unknown error"}`
+  );
+  return createFallbackDirectorPlan(story);
 }
 
 module.exports = generateDirectorPlan;
+module.exports._private = {
+  extractJsonResponse,
+  isProbablyIncompleteJson,
+  normalizeImagePrompt,
+  parseDirectorResponse,
+};
