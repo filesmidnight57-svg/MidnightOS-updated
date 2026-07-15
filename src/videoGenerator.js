@@ -379,46 +379,128 @@ function prepareSubtitleFile(introDuration = 0) {
   return temporarySubtitlePath;
 }
 
+function loadDirectorScenes() {
+  if (!fs.existsSync(directorPath)) {
+    return [];
+  }
+
+  try {
+    const directorPlan = JSON.parse(
+      fs.readFileSync(directorPath, "utf8")
+    );
+
+    return Array.isArray(directorPlan?.scenes)
+      ? directorPlan.scenes
+      : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function getSceneCinemaProfile(scene = {}) {
+  const sceneText = [
+    scene.mood,
+    scene.cameraShot,
+    scene.cameraMovement,
+    scene.lens,
+    scene.imagePrompt,
+    scene.description,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return {
+    isTense: /tense|panic|chase|fear|attack|threat|danger|urgent|running|jumpscare|jump scare/.test(sceneText),
+    isInvestigation: /investigation|investigate|clue|evidence|detective|search|case file|forensic|inspect/.test(sceneText),
+    isDark: /dark|night|shadow|basement|attic|abandoned|black|dim|low light|corridor/.test(sceneText),
+    hasFlashlight: /flashlight|torch|beam of light|handheld light/.test(sceneText),
+    isCctv: /cctv|security camera|surveillance|dashcam|bodycam|camcorder/.test(sceneText),
+  };
+}
+
 function createSceneBaseFilter(
   sceneNumber,
-  sceneDuration
+  sceneDuration,
+  scene = {}
 ) {
-  const fadeDuration = 0.35;
+  const fadeDuration = 0.42;
+  const blurDuration = 0.32;
+  const profile = getSceneCinemaProfile(scene);
 
   const fadeOutStart = Math.max(
     sceneDuration - fadeDuration,
     fadeDuration
   ).toFixed(3);
 
+  const blurOutStart = Math.max(
+    sceneDuration - blurDuration,
+    blurDuration
+  ).toFixed(3);
+
   const movementDirection =
     sceneNumber % 2 === 0 ? -1 : 1;
 
-  const zoomSpeed =
-    sceneNumber % 3 === 0
-      ? "0.0009"
-      : "0.0007";
+  const zoomSpeed = profile.isInvestigation
+    ? "0.00115"
+    : sceneNumber % 3 === 0
+      ? "0.00082"
+      : "0.00062";
 
-  return [
-    "scale=1400:2489:force_original_aspect_ratio=increase",
+  const shakeAmount = profile.isTense ? 7 : 0;
+  const breathingX = 9 + shakeAmount;
+  const breathingY = 7 + Math.round(shakeAmount * 0.7);
 
-    "crop=1400:2489",
+  const filters = [
+    "scale=1440:2560:force_original_aspect_ratio=increase",
+
+    "crop=1440:2560",
 
     "zoompan=" +
-      `z='min(zoom+${zoomSpeed},1.17)':` +
-      `x='iw/2-(iw/zoom/2)+sin(on/42)*${12 * movementDirection}':` +
-      `y='ih/2-(ih/zoom/2)+cos(on/52)*9':` +
+      `z='min(zoom+${zoomSpeed}+0.00018*sin(on/18),1.18)':` +
+      `x='iw/2-(iw/zoom/2)+sin(on/37)*${breathingX * movementDirection}+sin(on/5)*${shakeAmount}':` +
+      `y='ih/2-(ih/zoom/2)+cos(on/43)*${breathingY}+cos(on/6)*${shakeAmount}':` +
       "d=1:" +
       "s=1080x1920:" +
       "fps=30",
+
+    `boxblur=luma_radius=2:luma_power=1:chroma_radius=1:chroma_power=1:enable='lt(t,${blurDuration})+gt(t,${blurOutStart})'`,
 
     `fade=t=in:st=0:d=${fadeDuration}`,
 
     `fade=t=out:st=${fadeOutStart}:d=${fadeDuration}`,
 
+    "noise=alls=5:allf=t+u",
+  ];
+
+  if (profile.hasFlashlight) {
+    filters.push(
+      "drawbox=x=0:y=0:w=iw:h=ih:color=white@0.055:t=fill:enable='lt(mod(t,1.7),0.055)+between(mod(t,4.9),0.18,0.25)'"
+    );
+  }
+
+  if (profile.isDark) {
+    filters.push(
+      "drawbox=x='mod(t*19,iw)':y='mod(t*53,ih)':w=3:h=3:color=white@0.13:t=fill",
+      "drawbox=x='mod(t*47+320,iw)':y='mod(t*29+760,ih)':w=2:h=2:color=white@0.10:t=fill",
+      "drawbox=x='mod(t*31+810,iw)':y='mod(t*41+250,ih)':w=2:h=2:color=white@0.09:t=fill"
+    );
+  }
+
+  if (profile.isCctv) {
+    filters.push(
+      "drawbox=x=0:y='mod(t*120,ih)':w=iw:h=2:color=white@0.16:t=fill",
+      "drawbox=x=0:y=0:w=iw:h=ih:color=0x88ccff@0.035:t=fill:enable='lt(mod(t,6),0.12)'"
+    );
+  }
+
+  filters.push(
     "setsar=1",
 
-    "format=yuv420p",
-  ].join(",");
+    "format=yuv420p"
+  );
+
+  return filters.join(",");
 }
 
 function createLogoOverlayFilter(
@@ -449,7 +531,8 @@ function createBrandingLogoFilter(
 async function createSceneClip(
   imagePath,
   sceneNumber,
-  sceneDuration
+  sceneDuration,
+  scene = {}
 ) {
   const clipName =
     `scene_clip_${String(sceneNumber).padStart(2, "0")}.mp4`;
@@ -461,7 +544,8 @@ async function createSceneClip(
 
   const sceneBaseFilter = createSceneBaseFilter(
     sceneNumber,
-    sceneDuration
+    sceneDuration,
+    scene
   );
 
   const videoFilter =
@@ -1163,6 +1247,8 @@ async function generateVideo(
       brandingInfo
     );
 
+    const directorScenes = loadDirectorScenes();
+
     const sceneClipPaths = [];
 
     for (
@@ -1174,7 +1260,8 @@ async function generateVideo(
         await createSceneClip(
           sceneImagePaths[index],
           index + 1,
-          sceneDuration
+          sceneDuration,
+          directorScenes[index] || {}
         );
 
       sceneClipPaths.push(clipPath);
@@ -1219,7 +1306,15 @@ async function generateVideo(
     );
 
     console.log(
-      "🎥 Cinematic Zoom and Pan Added"
+      "🎥 Cinema Engine v2 Motion Added"
+    );
+
+    console.log(
+      "🎞️ Film Grain, Camera Breathing, Scene-Aware Shake/Push-In Added"
+    );
+
+    console.log(
+      "🌫️ Fade + Blur Transitions and Dark-Scene Atmosphere Added"
     );
 
     console.log(
