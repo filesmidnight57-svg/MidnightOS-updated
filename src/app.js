@@ -11,6 +11,7 @@ const generateDirectorPlan = require("./ai/director");
 const generateImage = require("./image");
 const generateVoice = require("./ai/voice/generateVoice");
 const generateVideo = require("./videoGenerator");
+const generatePublishingPack = require("./publishing");
 
 const getNextCaseNumber = require("./utils/caseManager");
 
@@ -150,6 +151,9 @@ async function main() {
   console.log("\n🎬 Rendering Final Director-Guided Video...");
   await generateVideo(sceneImagePaths);
 
+  console.log("\n📣 Creating AI Publishing Pack...");
+  generatePublishingPack(outputDir);
+
   console.log(
     "\n✅ MIDNIGHTOS AI DIRECTOR VIDEO GENERATED SUCCESSFULLY!\n"
   );
@@ -172,6 +176,13 @@ async function main() {
   console.log("✔ story.mp3");
   console.log("✔ story.srt");
   console.log("✔ horror_video.mp4");
+  console.log("✔ thumbnail.png");
+  console.log("✔ title.txt");
+  console.log("✔ description.txt");
+  console.log("✔ tags.txt");
+  console.log("✔ pinned_comment.txt");
+  console.log("✔ youtube.json");
+  console.log("✔ publish_report.json");
 }
 
 main().catch((error) => {
