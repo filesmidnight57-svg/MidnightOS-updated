@@ -8,7 +8,10 @@ const DEFAULT_OUTPUT_DIR = path.join(__dirname, "../output");
 const VALID_PRIVACY_STATUSES = new Set(["private", "unlisted", "public"]);
 
 function normalizeMode(value) {
-  return String(value || "mock").trim().toLowerCase() === "live" ? "live" : "mock";
+  const mode = String(value || "dry-run").trim().toLowerCase();
+  if (["live", "upload"].includes(mode)) return "live";
+  if (["dry-run", "dryrun", "mock", "test"].includes(mode)) return "dry-run";
+  throw new Error(`Invalid YouTube publish mode "${value}". Use dry-run or live.`);
 }
 
 function normalizePrivacyStatus(value) {
@@ -98,6 +101,16 @@ function loadPublishingInputs(outputDir = DEFAULT_OUTPUT_DIR) {
   };
 }
 
+function parseJsonResponse(text, label) {
+  if (!text) return {};
+
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(`${label} returned invalid JSON: ${text}`);
+  }
+}
+
 function requestJson(url, options = {}, body) {
   return new Promise((resolve, reject) => {
     const request = https.request(url, options, (response) => {
@@ -108,8 +121,11 @@ function requestJson(url, options = {}, body) {
         const text = Buffer.concat(chunks).toString("utf8");
         let data = {};
 
-        if (text) {
-          data = JSON.parse(text);
+        try {
+          data = parseJsonResponse(text, "YouTube API");
+        } catch (error) {
+          reject(error);
+          return;
         }
 
         if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -164,7 +180,14 @@ function requestStream(url, options, stream) {
       response.on("data", (chunk) => chunks.push(chunk));
       response.on("end", () => {
         const text = Buffer.concat(chunks).toString("utf8");
-        const data = text ? JSON.parse(text) : {};
+        let data = {};
+
+        try {
+          data = parseJsonResponse(text, "YouTube upload");
+        } catch (error) {
+          reject(error);
+          return;
+        }
 
         if (response.statusCode < 200 || response.statusCode >= 300) {
           reject(new Error(`YouTube upload failed (${response.statusCode}): ${text}`));
@@ -253,11 +276,12 @@ async function uploadLive(inputs) {
   };
 }
 
-function buildMockResult(inputs) {
+function buildDryRunResult(inputs) {
   return {
     uploaded: false,
+    dryRun: true,
     mock: true,
-    message: "Mock mode completed. No YouTube API upload was performed.",
+    message: "Dry-run completed. No YouTube API upload was performed.",
     plannedShortsUrl: null,
     validatedAssets: {
       videoBytes: inputs.files.video.bytes,
@@ -276,7 +300,7 @@ async function publishYouTubeShorts(options = {}) {
   const outputDir = options.outputDir || process.env.MIDNIGHTOS_OUTPUT_DIR || DEFAULT_OUTPUT_DIR;
   const mode = normalizeMode(options.mode || process.env.YOUTUBE_PUBLISH_MODE);
   const inputs = loadPublishingInputs(outputDir);
-  const result = mode === "live" ? await uploadLive(inputs) : buildMockResult(inputs);
+  const result = mode === "live" ? await uploadLive(inputs) : buildDryRunResult(inputs);
 
   const report = {
     generatedAt: new Date().toISOString(),
@@ -303,7 +327,7 @@ if (require.main === module) {
     .then(({ reportPath, report }) => {
       console.log(`✅ YouTube Publisher finished in ${report.mode} mode.`);
       console.log(`📝 Upload report saved: ${reportPath}`);
-      if (report.mode === "mock") console.log("🧪 No upload was performed.");
+      if (report.mode === "dry-run") console.log("🧪 No upload was performed.");
     })
     .catch((error) => {
       console.error(`❌ YouTube Publisher failed: ${error.message}`);
@@ -314,5 +338,6 @@ if (require.main === module) {
 module.exports = {
   publishYouTubeShorts,
   loadPublishingInputs,
+  normalizeMode,
   normalizePrivacyStatus,
 };
