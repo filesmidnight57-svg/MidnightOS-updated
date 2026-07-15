@@ -1,16 +1,21 @@
-const axios = require("axios");
+const { DEFAULT_MODEL, requestChatCompletion } = require("./openrouterClient");
+
+const FALLBACK_STORY = "रात 2:13 पर भोपाल पुलिस कंट्रोल रूम में एक कॉल आई, जिसमें सिर्फ सांसों की आवाज और लोहे के दरवाजे पर नाखून रगड़ने जैसी खरोंच सुनाई दे रही थी। लोकेशन पुराने पोस्टमार्टम हाउस के पीछे बंद पड़ी कॉलोनी निकली। सब-इंस्पेक्टर आरव जब बॉडीकैम लेकर अंदर गया, तो हर फ्लैट खाली था, लेकिन तीसरी मंजिल के कमरे में ताजा चाय रखी थी। CCTV में दिखा कि वही कमरा पिछले सात साल से सील था। पहली रिकॉर्डिंग में आरव अकेला था, मगर शीशे में उसके पीछे एक बच्चा खड़ा दिखा। जब टीम ने दरवाजा तोड़ा, अंदर दीवार पर आरव का नाम खून से लिखा था। दूसरी चौंकाने वाली बात यह थी कि emergency call आरव के ही पुराने नंबर से आई थी, जो उसकी मौत के बाद evidence locker में जमा था। सुबह बॉडीकैम मिला, पर आरव नहीं। आखिरी फ्रेम में वह कैमरे की तरफ मुड़कर फुसफुसाया, मैं अभी बाहर नहीं आया।";
 
 async function generateStory() {
-  const response = await axios.post(
-    "https://openrouter.ai/api/v1/chat/completions",
-    {
-      model: "deepseek/deepseek-chat-v3-0324",
-      max_tokens: 650,
-      temperature: 0.9,
-      messages: [
-        {
-          role: "system",
-          content: `
+  let story;
+
+  try {
+    story = await requestChatCompletion({
+      moduleName: "src/ai/story.js",
+      payload: {
+        model: process.env.OPENROUTER_MODEL || DEFAULT_MODEL,
+        max_tokens: 650,
+        temperature: 0.9,
+        messages: [
+          {
+            role: "system",
+            content: `
 You are an expert Hindi horror and thriller writer for short-form videos.
 
 Create realistic classified investigation stories that feel like leaked police cases.
@@ -29,10 +34,10 @@ The output will be directly converted into narration, so never include:
 
 Return only the clean spoken narration.
           `.trim(),
-        },
-        {
-          role: "user",
-          content: `
+          },
+          {
+            role: "user",
+            content: `
 एक classified police case जैसी हिंदी horror-thriller narration लिखो।
 
 कुल लंबाई:
@@ -53,18 +58,15 @@ Return only the clean spoken narration.
 - कोई markdown formatting न हो।
 - केवल वही text लौटाओ जिसे narrator सीधे बोल सके।
           `.trim(),
-        },
-      ],
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
+          },
+        ],
       },
-    }
-  );
-
-  const story = response.data?.choices?.[0]?.message?.content?.trim();
+    });
+  } catch (error) {
+    console.warn(error.message);
+    console.warn("⚠️ OpenRouter configuration failed. Using deterministic offline story so the pipeline can continue.");
+    story = FALLBACK_STORY;
+  }
 
   if (!story) {
     throw new Error("AI failed to generate the Hindi case story.");

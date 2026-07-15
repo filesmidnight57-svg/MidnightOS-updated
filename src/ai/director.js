@@ -1,11 +1,11 @@
-const axios = require("axios");
+const { DEFAULT_MODEL, OPENROUTER_API_URL, requestChatCompletion } = require("./openrouterClient");
 const {
   getMainCharacter,
   applyPermanentCharacterToDirectorPlan,
 } = require("../characterManager");
 
-const DIRECTOR_MODEL = "deepseek/deepseek-chat-v3-0324";
-const DIRECTOR_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+const DIRECTOR_MODEL = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
+const DIRECTOR_API_URL = process.env.OPENROUTER_API_URL || OPENROUTER_API_URL;
 const IMAGE_PROMPT_MAX_LENGTH = 900;
 
 function logDirectorJsonFailure(reason, detail) {
@@ -274,24 +274,16 @@ function buildDirectorMessages(story, mode = "normal") {
 }
 
 async function requestDirectorPlan(story, mode = "normal") {
-  const response = await axios.post(
-    DIRECTOR_API_URL,
-    {
+  return requestChatCompletion({
+    moduleName: "src/ai/director.js",
+    payload: {
       model: DIRECTOR_MODEL,
       max_tokens: mode === "short" ? 2200 : 3200,
       temperature: mode === "short" ? 0.35 : 0.6,
       messages: buildDirectorMessages(story, mode),
     },
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      timeout: 180000,
-    }
-  );
-
-  return response.data?.choices?.[0]?.message?.content?.trim() || "";
+    timeout: 180000,
+  });
 }
 
 function parseDirectorResponse(rawContent) {
