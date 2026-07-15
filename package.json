@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "node src/app.js",
-    "test": "echo \"No tests yet\""
+    "test": "echo \"No tests yet\"",
+    "publish": "node src/youtubePublisher.js"
   },
   "keywords": [],
   "author": "",
