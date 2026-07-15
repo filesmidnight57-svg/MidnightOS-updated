@@ -1,0 +1,19 @@
+{
+  "mainCharacterId": "inspector-rajesh-verma",
+  "characters": [
+    {
+      "id": "inspector-rajesh-verma",
+      "name": "Inspector Rajesh Verma",
+      "age": 42,
+      "gender": "male",
+      "nationality": "Indian",
+      "role": "police inspector",
+      "faceDescription": "Square jaw and deep-set brown eyes",
+      "hair": "Short black hair with grey streaks",
+      "facialHair": "Thick black moustache",
+      "bodyBuild": "Stocky muscular build",
+      "clothing": "Khaki police uniform",
+      "accessories": "Black duty belt, police radio, and silver wristwatch"
+    }
+  ]
+}
