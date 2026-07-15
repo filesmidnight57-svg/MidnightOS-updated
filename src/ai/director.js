@@ -1,4 +1,8 @@
 const axios = require("axios");
+const {
+  getMainCharacter,
+  applyPermanentCharacterToDirectorPlan,
+} = require("../characterManager");
 
 const DIRECTOR_MODEL = "deepseek/deepseek-chat-v3-0324";
 const DIRECTOR_API_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -138,7 +142,8 @@ function normalizeImagePrompt(prompt) {
 
 function createFallbackDirectorPlan(story) {
   const shortStory = truncateText(story.replace(/\s+/g, " ").trim(), 260) || "Hindi horror investigation";
-  const characterPrompt = "Indian investigator in his late thirties with a tired oval face, short black hair, light stubble, average build, khaki field jacket, dark shirt, and a small flashlight.";
+  const mainCharacter = getMainCharacter();
+  const characterPrompt = mainCharacter.consistencyPrompt;
   const location = "a dark Indian neighborhood with narrow lanes, damp concrete walls, weak tube lights, and heavy night fog";
 
   return validateDirectorPlan({
@@ -149,20 +154,7 @@ function createFallbackDirectorPlan(story) {
       evidenceType: "Police Bodycam",
       status: "CLASSIFIED",
     },
-    mainCharacter: {
-      name: "Investigator",
-      age: 38,
-      gender: "male",
-      nationality: "Indian",
-      role: "investigator",
-      faceDescription: "Tired oval face with tense eyes and realistic Indian features",
-      hair: "Short black hair",
-      facialHair: "Light stubble",
-      bodyBuild: "Average build",
-      clothing: "Khaki field jacket over a dark shirt",
-      accessories: "Small flashlight",
-      consistencyPrompt: characterPrompt,
-    },
+    mainCharacter,
     visualBible: {
       genre: "Found footage psychological horror",
       aspectRatio: "9:16 vertical",
@@ -216,6 +208,9 @@ function validateDirectorPlan(plan) {
     );
   }
 
+  const mainCharacter = getMainCharacter();
+  applyPermanentCharacterToDirectorPlan(plan, mainCharacter);
+
   plan.scenes.forEach((scene, index) => {
     if (!scene || typeof scene !== "object") {
       throw new Error(`Scene ${index + 1} valid object nahi hai.`);
@@ -244,6 +239,21 @@ function validateDirectorPlan(plan) {
 function buildDirectorMessages(story, mode = "normal") {
   const shorter = mode === "short";
   const imagePromptLimit = shorter ? 520 : IMAGE_PROMPT_MAX_LENGTH;
+  const mainCharacter = getMainCharacter();
+  const characterJson = JSON.stringify({
+    name: mainCharacter.name,
+    age: mainCharacter.age,
+    gender: mainCharacter.gender,
+    nationality: mainCharacter.nationality,
+    role: mainCharacter.role,
+    faceDescription: mainCharacter.faceDescription,
+    hair: mainCharacter.hair,
+    facialHair: mainCharacter.facialHair,
+    bodyBuild: mainCharacter.bodyBuild,
+    clothing: mainCharacter.clothing,
+    accessories: mainCharacter.accessories,
+    consistencyPrompt: mainCharacter.consistencyPrompt,
+  });
 
   return [
     {
@@ -253,11 +263,12 @@ function buildDirectorMessages(story, mode = "normal") {
         "Return only valid JSON, no markdown, no code fences, no explanations.",
         "Keep the exact requested schema and exactly 6 scenes.",
         `Each imagePrompt must be English and under ${imagePromptLimit} characters.`,
+        "Use only the permanent main character profile supplied by the user. Never invent or alter the character name, age, face, hairstyle, moustache, body type, clothing, or accessories.",
       ].join(" "),
     },
     {
       role: "user",
-      content: `Story:\n${story}\n\nReturn JSON with this exact schema: {"caseInfo":{"caseNumber":"CASE #0001","caseTitle":"Short Hindi case title","location":"Indian location","evidenceType":"CCTV Footage, Emergency Call, Voice Recording, Police Bodycam, Diary or other evidence","status":"UNSOLVED, CLASSIFIED or RESTRICTED"},"mainCharacter":{"name":"Character name","age":35,"gender":"male or female","nationality":"Indian","role":"role","faceDescription":"fixed face","hair":"fixed hair","facialHair":"fixed facial hair or clean-shaven","bodyBuild":"fixed build","clothing":"fixed clothing","accessories":"fixed accessories","consistencyPrompt":"one complete English sentence with exact same appearance"},"visualBible":{"genre":"Found footage psychological horror","aspectRatio":"9:16 vertical","overallStyle":"Ultra-realistic cinematic Indian horror","colorPalette":"Cold blue, desaturated grey and deep black","filmTexture":"Subtle film grain","lightingStyle":"Low-key practical lighting","locationContinuity":"recurring location description","negativePrompt":"cartoon, illustration, anime, distorted anatomy, extra fingers, duplicate people, text, captions, subtitles, watermark, logo"},"scenes":[{"sceneNumber":1,"title":"Short Hindi title","storyMoment":"Hindi story moment","cameraShot":"shot type","cameraMovement":"movement","lens":"24mm/35mm/50mm/85mm","lighting":"lighting","mood":"mood","colorGrade":"grade","soundSuggestion":"sound","imagePrompt":"English prompt"}]} Rules: scenes 1-6 = hook, investigation, first clue, danger, twist, unresolved ending. Use realistic Indian people/locations. Every imagePrompt must include the character consistency, recurring location, camera, lens, lighting, mood, color grade, vertical 9:16, ultra-realistic cinematic horror, no text/captions/logo/watermark. No readable signs/documents/messages.${shorter ? " Make all string values concise." : ""}`,
+      content: `Permanent main character profile (copy these exact details into mainCharacter and every imagePrompt):\n${characterJson}\n\nStory:\n${story}\n\nReturn JSON with this exact schema: {"caseInfo":{"caseNumber":"CASE #0001","caseTitle":"Short Hindi case title","location":"Indian location","evidenceType":"CCTV Footage, Emergency Call, Voice Recording, Police Bodycam, Diary or other evidence","status":"UNSOLVED, CLASSIFIED or RESTRICTED"},"mainCharacter":{"name":"Character name","age":35,"gender":"male or female","nationality":"Indian","role":"role","faceDescription":"fixed face","hair":"fixed hair","facialHair":"fixed facial hair or clean-shaven","bodyBuild":"fixed build","clothing":"fixed clothing","accessories":"fixed accessories","consistencyPrompt":"one complete English sentence with exact same appearance"},"visualBible":{"genre":"Found footage psychological horror","aspectRatio":"9:16 vertical","overallStyle":"Ultra-realistic cinematic Indian horror","colorPalette":"Cold blue, desaturated grey and deep black","filmTexture":"Subtle film grain","lightingStyle":"Low-key practical lighting","locationContinuity":"recurring location description","negativePrompt":"cartoon, illustration, anime, distorted anatomy, extra fingers, duplicate people, text, captions, subtitles, watermark, logo"},"scenes":[{"sceneNumber":1,"title":"Short Hindi title","storyMoment":"Hindi story moment","cameraShot":"shot type","cameraMovement":"movement","lens":"24mm/35mm/50mm/85mm","lighting":"lighting","mood":"mood","colorGrade":"grade","soundSuggestion":"sound","imagePrompt":"English prompt"}]} Rules: scenes 1-6 = hook, investigation, first clue, danger, twist, unresolved ending. Use realistic Indian people/locations. Every imagePrompt must begin with the permanent character consistency prompt exactly as supplied, then include the recurring location, camera, lens, lighting, mood, color grade, vertical 9:16, ultra-realistic cinematic horror, no text/captions/logo/watermark. No readable signs/documents/messages.${shorter ? " Make all string values concise." : ""}`,
     },
   ];
 }
