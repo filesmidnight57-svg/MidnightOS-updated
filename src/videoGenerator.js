@@ -1,10 +1,11 @@
 const { spawn } = require("child_process");
 const fs = require("fs");
 const path = require("path");
+const { ensureOutputDir } = require("./utils/outputContext");
 
 const projectRoot = path.resolve(__dirname, "..");
 
-const outputFolder = path.join(projectRoot, "output");
+const outputFolder = ensureOutputDir();
 
 const audioAssetsFolder = path.join(
   projectRoot,
@@ -1173,15 +1174,6 @@ async function generateVideo(
   resetProgressMessages();
 
   try {
-    if (!fs.existsSync(outputFolder)) {
-      fs.mkdirSync(
-        outputFolder,
-        {
-          recursive: true,
-        }
-      );
-    }
-
     checkRequiredFile(
       voicePath,
       "story.mp3"
