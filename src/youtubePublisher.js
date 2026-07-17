@@ -191,19 +191,6 @@ function createProgressStream(totalBytes, label) {
   });
 }
 
-function createMultipartBody(metadata, filePath, contentType, fileFieldName) {
-  const boundary = `midnightos-${Date.now()}`;
-  const file = fs.readFileSync(filePath);
-  const parts = [
-    Buffer.from(`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`),
-    Buffer.from(`--${boundary}\r\nContent-Type: ${contentType}\r\nContent-Disposition: form-data; name="${fileFieldName}"; filename="${path.basename(filePath)}"\r\n\r\n`),
-    file,
-    Buffer.from(`\r\n--${boundary}--\r\n`),
-  ];
-
-  return { body: Buffer.concat(parts), boundary };
-}
-
 async function uploadLive(inputs) {
   console.log("🚀 Upload Started");
   const accessToken = await getAccessToken();
@@ -255,22 +242,7 @@ async function uploadLive(inputs) {
   }
 
   console.log(`✅ YouTube Video ID: ${videoId}`);
-  console.log("🖼 Uploading Thumbnail...");
-
-  const thumbnailMultipart = createMultipartBody({}, inputs.files.thumbnail.path, "image/png", "media");
-
-  await requestJson(`https://www.googleapis.com/upload/youtube/v3/thumbnails/set?uploadType=multipart&videoId=${encodeURIComponent(videoId)}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": `multipart/related; boundary=${thumbnailMultipart.boundary}`,
-      "Content-Length": thumbnailMultipart.body.length,
-    },
-  }, thumbnailMultipart.body);
-
-  console.log(`Thumbnail upload progress: 100% (${inputs.files.thumbnail.bytes}/${inputs.files.thumbnail.bytes} bytes)`);
-
-  const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+  const videoUrl = `https://www.youtube.com/shorts/${videoId}`;
   console.log("✅ Upload Complete");
   console.log(`🔗 Video URL: ${videoUrl}`);
 
