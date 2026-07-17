@@ -12,6 +12,8 @@ const generateVideo = require("./videoGenerator");
 const generatePublishingPack = require("./publishing");
 const getNextCaseNumber = require("./utils/caseManager");
 const { createCaseOutputDir } = require("./utils/outputContext");
+const { publishAll } = require("./publishers");
+const { upsertCase } = require("./utils/store");
 
 const UTF8_ENCODING = "utf8";
 
@@ -97,12 +99,23 @@ async function generateCase() {
   return { caseNumber, outputDir };
 }
 
+async function runSingleCase(options = {}) {
+  const generated = await generateCase();
+  const videoPath = path.join(generated.outputDir, "horror_video.mp4");
+  upsertCase({ caseId: generated.caseNumber, outputDir: generated.outputDir, generatedAt: new Date().toISOString(), files: { video: videoPath }, status: "generated" });
+  if (options.generateOnly) return { ...generated, platforms: [] };
+  const caption = fs.readFileSync(path.join(generated.outputDir, "caption.txt"), UTF8_ENCODING);
+  const platforms = await publishAll({ outputDir: generated.outputDir, videoPath, caption, dryRun: Boolean(options.dryRun), youtubeOnly: Boolean(options.youtubeOnly) });
+  upsertCase({ caseId: generated.caseNumber, outputDir: generated.outputDir, title: fs.readFileSync(path.join(generated.outputDir, "title.txt"), UTF8_ENCODING).trim(), generatedAt: new Date().toISOString(), files: { video: videoPath }, platforms, status: platforms.some((item) => item.uploaded) ? "published" : "generated" });
+  return { ...generated, platforms };
+}
+
 if (require.main === module) {
-  generateCase().catch((error) => {
+  runSingleCase({ dryRun: process.argv.includes("--dry-run"), youtubeOnly: process.argv.includes("--youtube-only") }).catch((error) => {
     console.error("\n❌ MIDNIGHTOS AI DIRECTOR ERROR:\n");
     console.error(error.response?.data || error.message);
     process.exitCode = 1;
   });
 }
 
-module.exports = { generateCase, validatePublishingMetadata };
+module.exports = { generateCase, runSingleCase, validatePublishingMetadata };
