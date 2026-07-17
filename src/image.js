@@ -2,7 +2,6 @@ const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 
-const outputDir = path.join(__dirname, "../output");
 
 function wait(milliseconds) {
   return new Promise((resolve) => {
@@ -41,7 +40,8 @@ async function downloadImage(prompt, imagePath) {
 
 async function generateImage(
   prompt,
-  fileName = "horror_image.png"
+  fileName = "horror_image.png",
+  outputDir = path.join(__dirname, "../output")
 ) {
   if (!prompt || !prompt.trim()) {
     throw new Error("Image prompt empty hai.");

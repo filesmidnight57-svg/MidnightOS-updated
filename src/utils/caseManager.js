@@ -84,7 +84,7 @@ function getNextCaseNumber() {
 
   saveCaseDatabase(database);
 
-  return `CASE #${String(
+  return `CASE-${String(
     database.lastCaseNumber
   ).padStart(6, "0")}`;
 }

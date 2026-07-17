@@ -13,15 +13,15 @@ RUN:
 2. Run: npm install
 3. Confirm assets/audio/horror_background.mp3 exists.
 4. Run: npm start
-5. Final video: output/horror_video.mp4
+5. Final video: output/CASE-000001/horror_video.mp4
 
 Note: Rendering six 1080x1920 scenes can take several minutes.
 
 YOUTUBE PUBLISHING:
 1. Generate the project first so these files exist:
-   - output/horror_video.mp4
-   - output/thumbnail.png
-   - output/youtube.json
+   - output/CASE-000001/horror_video.mp4
+   - output/CASE-000001/thumbnail.png
+   - output/CASE-000001/youtube.json
 2. In Google Cloud Console, create or choose a project.
 3. Enable YouTube Data API v3 for that project.
 4. Configure the OAuth consent screen and add the scope:
@@ -44,6 +44,6 @@ YOUTUBE PUBLISHING:
 11. Real upload requires an explicit live mode:
    YOUTUBE_PUBLISH_MODE=live npm run publish
 12. The publisher writes:
-   output/upload_report.json
+   output/CASE-000001/upload_report.json
 
-The YouTube publisher uses OAuth 2.0 and the official YouTube Data API v3 endpoints for video insert, thumbnail set, and token refresh. Shorts metadata is read from output/youtube.json, and #Shorts is added to the description when missing.
+The YouTube publisher uses OAuth 2.0 and the official YouTube Data API v3 endpoints for video insert, thumbnail set, and token refresh. It uses the latest output/CASE-###### folder by default, and #Shorts is added to the description when missing.

@@ -5,6 +5,7 @@ const path = require("path");
 const https = require("https");
 const { Transform } = require("stream");
 const { getAccessToken, getMissingCredentialsMessage } = require("./youtubeOAuth");
+const { getLatestCaseOutputDir } = require("./utils/outputContext");
 
 const DEFAULT_OUTPUT_DIR = path.join(__dirname, "../output");
 const VALID_PRIVACY_STATUSES = new Set(["private", "unlisted", "public"]);
@@ -302,6 +303,7 @@ function parseCliOptions(argv = process.argv.slice(2)) {
     if (arg === "--dry-run") options.mode = "dry-run";
     if (arg === "--live" || arg === "--upload") options.mode = "live";
     if (arg.startsWith("--privacy=")) options.privacyStatus = arg.split("=")[1];
+    if (arg.startsWith("--output=")) options.outputDir = arg.split("=")[1];
   }
 
   return options;
@@ -336,7 +338,7 @@ function buildUploadReport(mode, inputs, result, error) {
 }
 
 async function publishYouTubeShorts(options = {}) {
-  const outputDir = options.outputDir || process.env.MIDNIGHTOS_OUTPUT_DIR || DEFAULT_OUTPUT_DIR;
+  const outputDir = options.outputDir || process.env.MIDNIGHTOS_OUTPUT_DIR || getLatestCaseOutputDir() || DEFAULT_OUTPUT_DIR;
   const mode = normalizeMode(options.mode || process.env.YOUTUBE_PUBLISH_MODE);
   let inputs;
 

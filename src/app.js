@@ -2,66 +2,29 @@ require("dotenv").config();
 
 const fs = require("fs");
 const path = require("path");
-
 const generateStory = require("./ai/story");
 const generateCaption = require("./ai/caption");
 const generateHashtags = require("./ai/hashtags");
 const generateDirectorPlan = require("./ai/director");
-
 const generateImage = require("./image");
 const generateVoice = require("./ai/voice/generateVoice");
 const generateVideo = require("./videoGenerator");
 const generatePublishingPack = require("./publishing");
-
 const getNextCaseNumber = require("./utils/caseManager");
+const { createCaseOutputDir } = require("./utils/outputContext");
 
-const outputDir = path.join(__dirname, "../output");
 const UTF8_ENCODING = "utf8";
 
 function wait(milliseconds) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, milliseconds);
-  });
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-function prepareOutputFolder() {
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, {
-      recursive: true,
-    });
-  }
-
-  const removableFiles = fs
-    .readdirSync(outputDir)
-    .filter((fileName) => {
-      return (
-        /^scene_\d{2}\.png$/i.test(fileName) ||
-        fileName === "director.json" ||
-        fileName === "scenes.json"
-      );
-    });
-
-  removableFiles.forEach((fileName) => {
-    fs.rmSync(path.join(outputDir, fileName), {
-      force: true,
-    });
-  });
+function saveTextFile(outputDir, fileName, content) {
+  fs.writeFileSync(path.join(outputDir, fileName), content, { encoding: UTF8_ENCODING });
 }
 
-function saveTextFile(fileName, content) {
-  fs.writeFileSync(
-    path.join(outputDir, fileName),
-    content,
-    { encoding: UTF8_ENCODING }
-  );
-}
-
-function saveJsonFile(fileName, data) {
-  fs.writeFileSync(
-    path.join(outputDir, fileName),
-    JSON.stringify(data, null, 2),
-    { encoding: UTF8_ENCODING }
-  );
+function saveJsonFile(outputDir, fileName, data) {
+  fs.writeFileSync(path.join(outputDir, fileName), JSON.stringify(data, null, 2), { encoding: UTF8_ENCODING });
 }
 
 function hasSuspiciousMojibake(text) {
@@ -72,164 +35,74 @@ function hasDevanagari(text) {
   return /[\u0900-\u097F]/.test(String(text || ""));
 }
 
-function validatePublishingMetadata() {
-  const title = fs.readFileSync(
-    path.join(outputDir, "title.txt"),
-    { encoding: UTF8_ENCODING }
-  );
-  const youtubeText = fs.readFileSync(
-    path.join(outputDir, "youtube.json"),
-    { encoding: UTF8_ENCODING }
-  );
-
+function validatePublishingMetadata(outputDir) {
+  const title = fs.readFileSync(path.join(outputDir, "title.txt"), UTF8_ENCODING);
+  const youtubeText = fs.readFileSync(path.join(outputDir, "youtube.json"), UTF8_ENCODING);
   if (hasSuspiciousMojibake(title) || hasSuspiciousMojibake(youtubeText)) {
-    throw new Error(
-      "Publishing metadata is still corrupted: title.txt or youtube.json contains suspicious mojibake patterns."
-    );
+    throw new Error("Publishing metadata is still corrupted: title.txt or youtube.json contains suspicious mojibake patterns.");
   }
 
-  const caption = fs.readFileSync(
-    path.join(outputDir, "caption.txt"),
-    { encoding: UTF8_ENCODING }
-  );
-
+  const caption = fs.readFileSync(path.join(outputDir, "caption.txt"), UTF8_ENCODING);
   if (hasDevanagari(caption) && !hasDevanagari(`${title}\n${youtubeText}`)) {
-    throw new Error(
-      "Publishing metadata validation failed: valid Devanagari source text was not preserved in generated metadata."
-    );
+    throw new Error("Publishing metadata validation failed: valid Devanagari source text was not preserved in generated metadata.");
   }
 }
 
-async function main() {
+async function generateCase() {
   console.log("🚀 MidnightOS AI Director Started\n");
-
-  prepareOutputFolder();
-
   const caseNumber = getNextCaseNumber();
-
+  const outputDir = createCaseOutputDir(caseNumber);
   console.log(`📂 New Case Assigned: ${caseNumber}`);
+  console.log(`📁 Case output: ${outputDir}`);
 
   console.log("📖 Generating Hindi Case Story...");
   const story = await generateStory();
-
   console.log("📝 Generating Caption...");
   const caption = await generateCaption(story);
-
   console.log("#️⃣ Generating Hashtags...");
   const hashtags = await generateHashtags(story);
-
   console.log("🎬 AI Director is planning the complete film...");
   const directorPlan = await generateDirectorPlan(story);
-
-  if (!directorPlan.caseInfo) {
-    directorPlan.caseInfo = {};
-  }
-
+  directorPlan.caseInfo = directorPlan.caseInfo || {};
   directorPlan.caseInfo.caseNumber = caseNumber;
-
   const scenes = directorPlan.scenes;
 
-  saveTextFile("story.txt", story);
-  saveTextFile("caption.txt", caption);
-  saveTextFile("hashtags.txt", hashtags);
-
-  saveTextFile("case_number.txt", caseNumber);
-
-  saveJsonFile("director.json", directorPlan);
-  saveJsonFile("scenes.json", scenes);
-
-  console.log("✅ AI Director Plan Created");
-  console.log(
-    `🎭 Main Character: ${directorPlan.mainCharacter.name}`
-  );
-  console.log(`📂 Case: ${caseNumber}`);
-  console.log(`🎞️ ${scenes.length} Directed Scenes Created`);
+  saveTextFile(outputDir, "story.txt", story);
+  saveTextFile(outputDir, "caption.txt", caption);
+  saveTextFile(outputDir, "hashtags.txt", hashtags);
+  saveTextFile(outputDir, "case_number.txt", caseNumber);
+  saveJsonFile(outputDir, "director.json", directorPlan);
+  saveJsonFile(outputDir, "scenes.json", scenes);
 
   console.log("\n🖼️ Generating Director-Guided Scene Images...");
-
   const sceneImagePaths = [];
-
   for (let index = 0; index < scenes.length; index += 1) {
     const scene = scenes[index];
-
-    const sceneNumber = String(index + 1).padStart(2, "0");
-    const fileName = `scene_${sceneNumber}.png`;
-
-    console.log(
-      `\n🖼️ Generating Scene ${index + 1}/${scenes.length}`
-    );
-    console.log(`🎥 Camera: ${scene.cameraShot}`);
-    console.log(`🎬 Motion: ${scene.cameraMovement}`);
-    console.log(`🔍 Lens: ${scene.lens}`);
-    console.log(`🌑 Mood: ${scene.mood}`);
-
-    const imagePath = await generateImage(
-      scene.imagePrompt,
-      fileName
-    );
-
+    const fileName = `scene_${String(index + 1).padStart(2, "0")}.png`;
+    console.log(`\n🖼️ Generating Scene ${index + 1}/${scenes.length}`);
+    const imagePath = await generateImage(scene.imagePrompt, fileName, outputDir);
     sceneImagePaths.push(imagePath);
-
-    if (index === 0) {
-      fs.copyFileSync(
-        imagePath,
-        path.join(outputDir, "horror_image.png")
-      );
-    }
-
-    if (index < scenes.length - 1) {
-      await wait(2000);
-    }
+    if (index === 0) fs.copyFileSync(imagePath, path.join(outputDir, "horror_image.png"));
+    if (index < scenes.length - 1) await wait(2000);
   }
 
   console.log("\n🎤 Generating Hindi Voice and Subtitles...");
-  await generateVoice(story);
-
+  await generateVoice(story, outputDir);
   console.log("\n🎬 Rendering Final Director-Guided Video...");
-  await generateVideo(sceneImagePaths);
-
+  await generateVideo(sceneImagePaths, outputDir);
   console.log("\n📣 Creating AI Publishing Pack...");
   generatePublishingPack(outputDir);
-  validatePublishingMetadata();
-
-  console.log(
-    "\n✅ MIDNIGHTOS AI DIRECTOR VIDEO GENERATED SUCCESSFULLY!\n"
-  );
-
-  console.log("📁 Output Folder:");
-  console.log("✔ case_number.txt");
-  console.log("✔ story.txt");
-  console.log("✔ caption.txt");
-  console.log("✔ hashtags.txt");
-  console.log("✔ director.json");
-  console.log("✔ scenes.json");
-
-  scenes.forEach((_, index) => {
-    console.log(
-      `✔ scene_${String(index + 1).padStart(2, "0")}.png`
-    );
-  });
-
-  console.log("✔ horror_image.png");
-  console.log("✔ story.mp3");
-  console.log("✔ story.srt");
-  console.log("✔ horror_video.mp4");
-  console.log("✔ thumbnail.png");
-  console.log("✔ title.txt");
-  console.log("✔ description.txt");
-  console.log("✔ tags.txt");
-  console.log("✔ pinned_comment.txt");
-  console.log("✔ youtube.json");
-  console.log("✔ publish_report.json");
+  validatePublishingMetadata(outputDir);
+  console.log(`\n✅ Case generated successfully: ${outputDir}`);
+  return { caseNumber, outputDir };
 }
 
-main().catch((error) => {
-  console.error("\n❌ MIDNIGHTOS AI DIRECTOR ERROR:\n");
+if (require.main === module) {
+  generateCase().catch((error) => {
+    console.error("\n❌ MIDNIGHTOS AI DIRECTOR ERROR:\n");
+    console.error(error.response?.data || error.message);
+    process.exitCode = 1;
+  });
+}
 
-  console.error(
-    error.response?.data ||
-    error.message
-  );
-
-  process.exitCode = 1;
-});
+module.exports = { generateCase, validatePublishingMetadata };

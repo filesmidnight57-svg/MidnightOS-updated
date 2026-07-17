@@ -2,10 +2,8 @@ const { spawn } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
-async function generateVoice(text) {
+async function generateVoice(text, outputDir = path.join(__dirname, "../../../output")) {
   return new Promise((resolve, reject) => {
-    const outputDir = path.join(__dirname, "../../../output");
-
     const outputFile = path.join(outputDir, "story.mp3");
     const subtitleFile = path.join(outputDir, "story.srt");
 

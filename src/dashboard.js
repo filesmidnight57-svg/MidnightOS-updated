@@ -6,6 +6,7 @@ const { URL } = require("url");
 const PORT = Number.parseInt(process.env.DASHBOARD_PORT || "3000", 10);
 const projectRoot = path.resolve(__dirname, "..");
 const outputDir = path.join(projectRoot, "output");
+const CASE_DIRECTORY_PATTERN = /^CASE-\d{6}$/;
 
 const FILES = {
   video: "horror_video.mp4",
@@ -21,14 +22,14 @@ function exists(filePath) {
   return fs.existsSync(filePath) && fs.statSync(filePath).isFile();
 }
 
-function readText(fileName) {
-  const filePath = path.join(outputDir, fileName);
+function readText(caseOutputDir, fileName) {
+  const filePath = path.join(caseOutputDir, fileName);
   if (!exists(filePath)) return "";
   return fs.readFileSync(filePath, "utf8").trim();
 }
 
-function readJson(fileName) {
-  const text = readText(fileName);
+function readJson(caseOutputDir, fileName) {
+  const text = readText(caseOutputDir, fileName);
   if (!text) return null;
 
   try {
@@ -38,13 +39,13 @@ function readJson(fileName) {
   }
 }
 
-function getFileInfo(fileName) {
-  const filePath = path.join(outputDir, fileName);
+function getFileInfo(caseOutputDir, caseId, fileName) {
+  const filePath = path.join(caseOutputDir, fileName);
   if (!exists(filePath)) return null;
   const stats = fs.statSync(filePath);
   return {
     fileName,
-    path: `/assets/${encodeURIComponent(fileName)}`,
+    path: `/assets/${encodeURIComponent(caseId)}/${encodeURIComponent(fileName)}`,
     size: stats.size,
     modifiedAt: stats.mtime.toISOString(),
   };
@@ -78,20 +79,29 @@ function getPublishStatus(uploadReport, publishReport) {
 }
 
 function buildDashboardData() {
-  const video = getFileInfo(FILES.video);
-  const thumbnail = getFileInfo(FILES.thumbnail);
-  const youtube = readJson(FILES.youtube);
-  const uploadReport = readJson(FILES.uploadReport);
-  const publishReport = readJson(FILES.publishReport);
+  const caseDirectories = fs.existsSync(outputDir)
+    ? fs.readdirSync(outputDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && CASE_DIRECTORY_PATTERN.test(entry.name))
+      .sort((left, right) => fs.statSync(path.join(outputDir, right.name)).mtimeMs - fs.statSync(path.join(outputDir, left.name)).mtimeMs)
+    : [];
+  const latestCase = caseDirectories[0];
+  const caseId = latestCase?.name || "legacy-output";
+  const caseOutputDir = latestCase ? path.join(outputDir, latestCase.name) : outputDir;
+  const video = getFileInfo(caseOutputDir, caseId, FILES.video);
+  const thumbnail = getFileInfo(caseOutputDir, caseId, FILES.thumbnail);
+  const youtube = readJson(caseOutputDir, FILES.youtube);
+  const uploadReport = readJson(caseOutputDir, FILES.uploadReport);
+  const publishReport = readJson(caseOutputDir, FILES.publishReport);
 
   return {
     video,
     thumbnail,
-    caseNumber: readText(FILES.caseNumber) || "No case generated",
-    storyTitle: readText(FILES.title) || youtube?.title || "No story title yet",
+    caseNumber: readText(caseOutputDir, FILES.caseNumber) || "No case generated",
+    storyTitle: readText(caseOutputDir, FILES.title) || youtube?.title || "No story title yet",
     publishStatus: getPublishStatus(uploadReport, publishReport),
     lastGeneratedTime: getLatestGeneratedTime([video, thumbnail], [uploadReport, publishReport]),
-    outputFolder: outputDir,
+    outputFolder: caseOutputDir,
+    availableCases: caseDirectories.map((entry) => entry.name),
   };
 }
 
@@ -104,9 +114,13 @@ function send(response, statusCode, contentType, body, headers = {}) {
   response.end(body);
 }
 
-function serveAsset(response, fileName) {
+function serveAsset(response, caseId, fileName) {
+  if (!CASE_DIRECTORY_PATTERN.test(caseId)) {
+    send(response, 404, "text/plain; charset=utf-8", "Asset not found");
+    return;
+  }
   const safeFileName = path.basename(fileName);
-  const filePath = path.join(outputDir, safeFileName);
+  const filePath = path.join(outputDir, caseId, safeFileName);
 
   if (!exists(filePath)) {
     send(response, 404, "text/plain; charset=utf-8", "Asset not found");
@@ -223,7 +237,8 @@ const server = http.createServer((request, response) => {
   }
 
   if (requestUrl.pathname.startsWith("/assets/")) {
-    serveAsset(response, decodeURIComponent(requestUrl.pathname.replace("/assets/", "")));
+    const [, , caseId, fileName] = requestUrl.pathname.split("/");
+    serveAsset(response, decodeURIComponent(caseId || ""), decodeURIComponent(fileName || ""));
     return;
   }
 
