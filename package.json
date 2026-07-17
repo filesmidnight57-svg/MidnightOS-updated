@@ -7,7 +7,10 @@
     "start": "node src/app.js",
     "dev": "node src/app.js",
     "batch": "node src/batch.js",
-    "test": "echo \"No tests yet\"",
+    "morning": "node src/morning.js",
+    "doctor": "node src/doctor.js",
+    "check": "node --check src/app.js && node --check src/morning.js && node --check src/publishers.js && node --check src/dashboard.js && node --check src/analytics.js",
+    "test": "node --test test/*.test.js",
     "publish": "node src/youtubePublisher.js",
     "dashboard": "node src/dashboard.js",
     "youtube:auth": "node src/youtubeOAuth.js"

@@ -9,6 +9,7 @@ const { OAuth2Client } = require("google-auth-library");
 
 const DEFAULT_REDIRECT_URI = "http://localhost:53682/oauth2callback";
 const YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload";
+const YOUTUBE_ANALYTICS_SCOPE = "https://www.googleapis.com/auth/youtube.readonly";
 const DEFAULT_TOKEN_PATH = path.join(os.homedir(), ".midnightos", "youtube-oauth.json");
 
 function getTokenPath() {
@@ -36,7 +37,7 @@ function buildAuthUrl(config = getOAuthConfig()) {
   return client.generateAuthUrl({
     access_type: "offline",
     prompt: "consent",
-    scope: [YOUTUBE_UPLOAD_SCOPE],
+    scope: [YOUTUBE_UPLOAD_SCOPE, YOUTUBE_ANALYTICS_SCOPE],
   });
 }
 
@@ -173,6 +174,7 @@ if (require.main === module) {
 module.exports = {
   DEFAULT_TOKEN_PATH,
   YOUTUBE_UPLOAD_SCOPE,
+  YOUTUBE_ANALYTICS_SCOPE,
   buildAuthUrl,
   exchangeCodeForTokens,
   getAccessToken,
