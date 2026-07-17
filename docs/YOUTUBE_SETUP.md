@@ -55,7 +55,7 @@ Before uploading, validate that the Shorts video, thumbnail, and metadata exist:
 npm run publish -- --dry-run
 ```
 
-Dry run writes `output/upload_report.json` but does not contact the YouTube upload API.
+Dry run writes `output/CASE-######/upload_report.json` but does not contact the YouTube upload API.
 
 ## 5. Publish live
 
@@ -71,7 +71,7 @@ or:
 npm run publish -- --live
 ```
 
-The YouTube Publisher uploads `output/horror_video.mp4`, applies metadata from `output/youtube.json`, sets `#Shorts` in the description when needed, uploads `output/thumbnail.png`, and writes the result to `output/upload_report.json`.
+The YouTube Publisher uploads files from the latest `output/CASE-######/` folder, applies metadata from that folder's `youtube.json`, sets `#Shorts` in the description when needed, and writes the result to that folder's `upload_report.json`.
 
 ## Missing credentials
 

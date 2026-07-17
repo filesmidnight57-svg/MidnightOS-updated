@@ -5,7 +5,7 @@ const { ensureOutputDir } = require("./utils/outputContext");
 
 const projectRoot = path.resolve(__dirname, "..");
 
-const outputFolder = ensureOutputDir();
+let outputFolder = ensureOutputDir();
 
 const audioAssetsFolder = path.join(
   projectRoot,
@@ -13,12 +13,12 @@ const audioAssetsFolder = path.join(
   "audio"
 );
 
-const voicePath = path.join(
+let voicePath = path.join(
   outputFolder,
   "story.mp3"
 );
 
-const subtitlePath = path.join(
+let subtitlePath = path.join(
   outputFolder,
   "story.srt"
 );
@@ -35,17 +35,17 @@ const logoPath = path.join(
   "logo.png"
 );
 
-const videoPath = path.join(
+let videoPath = path.join(
   outputFolder,
   "horror_video.mp4"
 );
 
-const temporaryFolder = path.join(
+let temporaryFolder = path.join(
   outputFolder,
   "video_temp"
 );
 
-const directorPath = path.join(
+let directorPath = path.join(
   outputFolder,
   "director.json"
 );
@@ -1168,9 +1168,17 @@ function findSceneImages() {
     });
 }
 
-async function generateVideo(
-  suppliedSceneImagePaths = []
-) {
+function setOutputFolder(caseOutputDir) {
+  outputFolder = caseOutputDir || ensureOutputDir();
+  voicePath = path.join(outputFolder, "story.mp3");
+  subtitlePath = path.join(outputFolder, "story.srt");
+  videoPath = path.join(outputFolder, "horror_video.mp4");
+  temporaryFolder = path.join(outputFolder, "video_temp");
+  directorPath = path.join(outputFolder, "director.json");
+}
+
+async function generateVideo(suppliedSceneImagePaths = [], caseOutputDir) {
+  setOutputFolder(caseOutputDir);
   resetProgressMessages();
 
   try {
