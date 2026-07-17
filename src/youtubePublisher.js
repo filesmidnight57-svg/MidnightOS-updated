@@ -61,13 +61,11 @@ function ensureShortsDescription(description) {
 
 function loadPublishingInputs(outputDir = DEFAULT_OUTPUT_DIR, options = {}) {
   const videoPath = path.join(outputDir, "horror_video.mp4");
-  const thumbnailPath = path.join(outputDir, "thumbnail.png");
   const titlePath = path.join(outputDir, "title.txt");
   const descriptionPath = path.join(outputDir, "description.txt");
   const tagsPath = path.join(outputDir, "tags.txt");
 
   const videoStats = assertReadableFile(videoPath, "YouTube video");
-  const thumbnailStats = assertReadableFile(thumbnailPath, "YouTube thumbnail");
   const title = readTextFile(titlePath, "YouTube title");
   const description = ensureShortsDescription(readTextFile(descriptionPath, "YouTube description"));
   const tags = normalizeTags(readTextFile(tagsPath, "YouTube tags"));
@@ -83,7 +81,6 @@ function loadPublishingInputs(outputDir = DEFAULT_OUTPUT_DIR, options = {}) {
     outputDir,
     files: {
       video: { path: videoPath, bytes: videoStats.size },
-      thumbnail: { path: thumbnailPath, bytes: thumbnailStats.size },
       title: { path: titlePath },
       description: { path: descriptionPath },
       tags: { path: tagsPath },
@@ -263,7 +260,6 @@ function buildDryRunResult(inputs) {
     plannedShortsUrl: null,
     validatedAssets: {
       videoBytes: inputs.files.video.bytes,
-      thumbnailBytes: inputs.files.thumbnail.bytes,
     },
   };
 }
@@ -299,7 +295,6 @@ function buildUploadReport(mode, inputs, result, error) {
     metadata: inputs ? inputs.metadata : undefined,
     files: inputs ? {
       video: path.basename(inputs.files.video.path),
-      thumbnail: path.basename(inputs.files.thumbnail.path),
       title: path.basename(inputs.files.title.path),
       description: path.basename(inputs.files.description.path),
       tags: path.basename(inputs.files.tags.path),
