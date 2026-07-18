@@ -9,8 +9,8 @@
     "batch": "node src/batch.js",
     "morning": "node src/morning.js",
     "doctor": "node src/doctor.js",
-    "check": "node --check src/app.js && node --check src/morning.js && node --check src/publishers.js && node --check src/dashboard.js && node --check src/analytics.js",
-    "test": "node --test test/*.test.js",
+    "check": "node --check src/app.js && node --check src/morning.js && node --check src/publishers.js && node --check src/dashboard.js && node --check src/analytics.js && node --check src/utils/caseManager.js",
+    "test": "node --test --test-concurrency=1 test/*.test.js",
     "publish": "node src/youtubePublisher.js",
     "dashboard": "node src/dashboard.js",
     "youtube:auth": "node src/youtubeOAuth.js"

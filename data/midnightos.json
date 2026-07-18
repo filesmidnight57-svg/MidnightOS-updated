@@ -1,0 +1,726 @@
+{
+  "version": 1,
+  "cases": {
+    "CASE-000002": {
+      "caseId": "CASE-000002",
+      "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000002",
+      "generatedAt": "2026-07-17T19:09:45.913Z",
+      "files": {
+        "video": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000002\\horror_video.mp4"
+      },
+      "status": "generated",
+      "updatedAt": "2026-07-17T19:09:45.914Z",
+      "title": "CASE #000002: बिना हाथों वाला भूत Horror Mystery | Scary Mystery Story",
+      "platforms": [
+        {
+          "platform": "youtube",
+          "configured": true,
+          "attempted": true,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Dry run: YouTube upload not performed.",
+          "startedAt": "2026-07-17T19:09:45.912Z",
+          "completedAt": "2026-07-17T19:09:45.912Z"
+        },
+        {
+          "platform": "facebook",
+          "configured": false,
+          "attempted": false,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Configuration required: FACEBOOK_UPLOAD_ENABLED, FACEBOOK_PAGE_ID, and FACEBOOK_PAGE_ACCESS_TOKEN.",
+          "startedAt": "2026-07-17T19:09:45.913Z",
+          "completedAt": "2026-07-17T19:09:45.913Z"
+        },
+        {
+          "platform": "instagram",
+          "configured": false,
+          "attempted": false,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Configuration required: INSTAGRAM_UPLOAD_ENABLED, INSTAGRAM_ACCOUNT_ID, and INSTAGRAM_ACCESS_TOKEN (or Facebook Page token).",
+          "startedAt": "2026-07-17T19:09:45.913Z",
+          "completedAt": "2026-07-17T19:09:45.913Z"
+        }
+      ]
+    },
+    "CASE-000003": {
+      "caseId": "CASE-000003",
+      "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000003",
+      "generatedAt": "2026-07-17T19:32:06.920Z",
+      "files": {
+        "video": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000003\\horror_video.mp4"
+      },
+      "status": "generated",
+      "updatedAt": "2026-07-17T19:32:06.920Z",
+      "title": "CASE #000003: खूनी शीशे का रहस्य Horror Mystery | Scary Mystery Story",
+      "platforms": [
+        {
+          "platform": "youtube",
+          "configured": true,
+          "attempted": true,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Dry run: YouTube upload not performed.",
+          "startedAt": "2026-07-17T19:32:06.919Z",
+          "completedAt": "2026-07-17T19:32:06.919Z"
+        },
+        {
+          "platform": "facebook",
+          "configured": false,
+          "attempted": false,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Configuration required: FACEBOOK_UPLOAD_ENABLED, FACEBOOK_PAGE_ID, and FACEBOOK_PAGE_ACCESS_TOKEN.",
+          "startedAt": "2026-07-17T19:32:06.919Z",
+          "completedAt": "2026-07-17T19:32:06.919Z"
+        },
+        {
+          "platform": "instagram",
+          "configured": false,
+          "attempted": false,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Configuration required: INSTAGRAM_UPLOAD_ENABLED, INSTAGRAM_ACCOUNT_ID, and INSTAGRAM_ACCESS_TOKEN (or Facebook Page token).",
+          "startedAt": "2026-07-17T19:32:06.920Z",
+          "completedAt": "2026-07-17T19:32:06.920Z"
+        }
+      ]
+    },
+    "CASE-000004": {
+      "caseId": "CASE-000004",
+      "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000004",
+      "generatedAt": "2026-07-17T19:45:49.017Z",
+      "files": {
+        "video": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000004\\horror_video.mp4"
+      },
+      "status": "generated",
+      "updatedAt": "2026-07-17T19:45:49.018Z",
+      "title": "CASE #000004: छत के पंखे का भूत Horror Mystery | Scary Mystery Story",
+      "platforms": [
+        {
+          "platform": "youtube",
+          "configured": true,
+          "attempted": true,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Dry run: YouTube upload not performed.",
+          "startedAt": "2026-07-17T19:45:49.016Z",
+          "completedAt": "2026-07-17T19:45:49.016Z"
+        },
+        {
+          "platform": "facebook",
+          "configured": false,
+          "attempted": false,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Configuration required: FACEBOOK_UPLOAD_ENABLED, FACEBOOK_PAGE_ID, and FACEBOOK_PAGE_ACCESS_TOKEN.",
+          "startedAt": "2026-07-17T19:45:49.016Z",
+          "completedAt": "2026-07-17T19:45:49.016Z"
+        },
+        {
+          "platform": "instagram",
+          "configured": false,
+          "attempted": false,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Configuration required: INSTAGRAM_UPLOAD_ENABLED, INSTAGRAM_ACCOUNT_ID, and INSTAGRAM_ACCESS_TOKEN (or Facebook Page token).",
+          "startedAt": "2026-07-17T19:45:49.017Z",
+          "completedAt": "2026-07-17T19:45:49.017Z"
+        }
+      ]
+    },
+    "CASE-000005": {
+      "caseId": "CASE-000005",
+      "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000005",
+      "generatedAt": "2026-07-17T19:59:09.794Z",
+      "files": {
+        "video": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000005\\horror_video.mp4"
+      },
+      "status": "generated",
+      "updatedAt": "2026-07-17T19:59:09.795Z",
+      "title": "CASE #000005: नकल करने वाला Horror Mystery | Scary Mystery Story",
+      "platforms": [
+        {
+          "platform": "youtube",
+          "configured": true,
+          "attempted": true,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Dry run: YouTube upload not performed.",
+          "startedAt": "2026-07-17T19:59:09.794Z",
+          "completedAt": "2026-07-17T19:59:09.794Z"
+        },
+        {
+          "platform": "facebook",
+          "configured": false,
+          "attempted": false,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Configuration required: FACEBOOK_UPLOAD_ENABLED, FACEBOOK_PAGE_ID, and FACEBOOK_PAGE_ACCESS_TOKEN.",
+          "startedAt": "2026-07-17T19:59:09.794Z",
+          "completedAt": "2026-07-17T19:59:09.794Z"
+        },
+        {
+          "platform": "instagram",
+          "configured": false,
+          "attempted": false,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Configuration required: INSTAGRAM_UPLOAD_ENABLED, INSTAGRAM_ACCOUNT_ID, and INSTAGRAM_ACCESS_TOKEN (or Facebook Page token).",
+          "startedAt": "2026-07-17T19:59:09.794Z",
+          "completedAt": "2026-07-17T19:59:09.794Z"
+        }
+      ]
+    },
+    "CASE-000007": {
+      "caseId": "CASE-000007",
+      "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000007",
+      "generatedAt": "2026-07-17T20:57:17.841Z",
+      "files": {
+        "video": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000007\\horror_video.mp4"
+      },
+      "status": "generated",
+      "updatedAt": "2026-07-17T20:57:17.842Z",
+      "title": "CASE #000007: गायब बेटे की आवाज़ Horror Mystery | Scary Mystery Story",
+      "platforms": [
+        {
+          "platform": "youtube",
+          "configured": true,
+          "attempted": true,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Dry run: YouTube upload not performed.",
+          "startedAt": "2026-07-17T20:57:17.841Z",
+          "completedAt": "2026-07-17T20:57:17.841Z"
+        },
+        {
+          "platform": "facebook",
+          "configured": false,
+          "attempted": false,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Configuration required: FACEBOOK_UPLOAD_ENABLED, FACEBOOK_PAGE_ID, and FACEBOOK_PAGE_ACCESS_TOKEN.",
+          "startedAt": "2026-07-17T20:57:17.841Z",
+          "completedAt": "2026-07-17T20:57:17.841Z"
+        },
+        {
+          "platform": "instagram",
+          "configured": false,
+          "attempted": false,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Configuration required: INSTAGRAM_UPLOAD_ENABLED, INSTAGRAM_ACCOUNT_ID, and INSTAGRAM_ACCESS_TOKEN (or Facebook Page token).",
+          "startedAt": "2026-07-17T20:57:17.841Z",
+          "completedAt": "2026-07-17T20:57:17.841Z"
+        }
+      ]
+    },
+    "CASE-000008": {
+      "caseId": "CASE-000008",
+      "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000008",
+      "generatedAt": "2026-07-17T21:10:58.783Z",
+      "files": {
+        "video": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000008\\horror_video.mp4"
+      },
+      "status": "generated",
+      "updatedAt": "2026-07-17T21:10:58.784Z",
+      "title": "CASE #000008: हवेली का रहस्य Horror Mystery | Scary Mystery Story",
+      "platforms": [
+        {
+          "platform": "youtube",
+          "configured": true,
+          "attempted": true,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Dry run: YouTube upload not performed.",
+          "startedAt": "2026-07-17T21:10:58.783Z",
+          "completedAt": "2026-07-17T21:10:58.783Z"
+        },
+        {
+          "platform": "facebook",
+          "configured": false,
+          "attempted": false,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Configuration required: FACEBOOK_UPLOAD_ENABLED, FACEBOOK_PAGE_ID, and FACEBOOK_PAGE_ACCESS_TOKEN.",
+          "startedAt": "2026-07-17T21:10:58.783Z",
+          "completedAt": "2026-07-17T21:10:58.783Z"
+        },
+        {
+          "platform": "instagram",
+          "configured": false,
+          "attempted": false,
+          "uploaded": false,
+          "mediaId": null,
+          "url": null,
+          "error": "Configuration required: INSTAGRAM_UPLOAD_ENABLED, INSTAGRAM_ACCOUNT_ID, and INSTAGRAM_ACCESS_TOKEN (or Facebook Page token).",
+          "startedAt": "2026-07-17T21:10:58.783Z",
+          "completedAt": "2026-07-17T21:10:58.783Z"
+        }
+      ]
+    }
+  },
+  "batches": {
+    "batch-2026-07-17T19-01-30-488Z": {
+      "id": "batch-2026-07-17T19-01-30-488Z",
+      "startedAt": "2026-07-17T19:01:30.488Z",
+      "targetCount": 1,
+      "cases": [
+        {
+          "startedAt": "2026-07-17T19:01:30.492Z",
+          "caseId": "CASE-000002",
+          "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000002",
+          "platforms": [
+            {
+              "platform": "youtube",
+              "configured": true,
+              "attempted": true,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Dry run: YouTube upload not performed.",
+              "startedAt": "2026-07-17T19:09:45.912Z",
+              "completedAt": "2026-07-17T19:09:45.912Z"
+            },
+            {
+              "platform": "facebook",
+              "configured": false,
+              "attempted": false,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Configuration required: FACEBOOK_UPLOAD_ENABLED, FACEBOOK_PAGE_ID, and FACEBOOK_PAGE_ACCESS_TOKEN.",
+              "startedAt": "2026-07-17T19:09:45.913Z",
+              "completedAt": "2026-07-17T19:09:45.913Z"
+            },
+            {
+              "platform": "instagram",
+              "configured": false,
+              "attempted": false,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Configuration required: INSTAGRAM_UPLOAD_ENABLED, INSTAGRAM_ACCOUNT_ID, and INSTAGRAM_ACCESS_TOKEN (or Facebook Page token).",
+              "startedAt": "2026-07-17T19:09:45.913Z",
+              "completedAt": "2026-07-17T19:09:45.913Z"
+            }
+          ],
+          "completedAt": "2026-07-17T19:09:46.221Z"
+        }
+      ],
+      "status": "completed",
+      "options": {
+        "count": 1,
+        "dryRun": true,
+        "youtubeOnly": false
+      },
+      "updatedAt": "2026-07-17T19:09:46.225Z",
+      "completedAt": "2026-07-17T19:09:46.224Z"
+    },
+    "batch-2026-07-17T19-23-37-759Z": {
+      "id": "batch-2026-07-17T19-23-37-759Z",
+      "startedAt": "2026-07-17T19:23:37.759Z",
+      "targetCount": 1,
+      "cases": [
+        {
+          "startedAt": "2026-07-17T19:23:37.788Z",
+          "caseId": "CASE-000003",
+          "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000003",
+          "platforms": [
+            {
+              "platform": "youtube",
+              "configured": true,
+              "attempted": true,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Dry run: YouTube upload not performed.",
+              "startedAt": "2026-07-17T19:32:06.919Z",
+              "completedAt": "2026-07-17T19:32:06.919Z"
+            },
+            {
+              "platform": "facebook",
+              "configured": false,
+              "attempted": false,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Configuration required: FACEBOOK_UPLOAD_ENABLED, FACEBOOK_PAGE_ID, and FACEBOOK_PAGE_ACCESS_TOKEN.",
+              "startedAt": "2026-07-17T19:32:06.919Z",
+              "completedAt": "2026-07-17T19:32:06.919Z"
+            },
+            {
+              "platform": "instagram",
+              "configured": false,
+              "attempted": false,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Configuration required: INSTAGRAM_UPLOAD_ENABLED, INSTAGRAM_ACCOUNT_ID, and INSTAGRAM_ACCESS_TOKEN (or Facebook Page token).",
+              "startedAt": "2026-07-17T19:32:06.920Z",
+              "completedAt": "2026-07-17T19:32:06.920Z"
+            }
+          ],
+          "completedAt": "2026-07-17T19:32:07.263Z"
+        }
+      ],
+      "status": "completed",
+      "options": {
+        "count": 1,
+        "dryRun": true,
+        "youtubeOnly": false
+      },
+      "updatedAt": "2026-07-17T19:32:07.279Z",
+      "completedAt": "2026-07-17T19:32:07.277Z"
+    },
+    "batch-2026-07-17T19-36-25-733Z": {
+      "id": "batch-2026-07-17T19-36-25-733Z",
+      "startedAt": "2026-07-17T19:36:25.733Z",
+      "targetCount": 1,
+      "cases": [
+        {
+          "startedAt": "2026-07-17T19:36:25.738Z",
+          "caseId": "CASE-000004",
+          "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000004",
+          "platforms": [
+            {
+              "platform": "youtube",
+              "configured": true,
+              "attempted": true,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Dry run: YouTube upload not performed.",
+              "startedAt": "2026-07-17T19:45:49.016Z",
+              "completedAt": "2026-07-17T19:45:49.016Z"
+            },
+            {
+              "platform": "facebook",
+              "configured": false,
+              "attempted": false,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Configuration required: FACEBOOK_UPLOAD_ENABLED, FACEBOOK_PAGE_ID, and FACEBOOK_PAGE_ACCESS_TOKEN.",
+              "startedAt": "2026-07-17T19:45:49.016Z",
+              "completedAt": "2026-07-17T19:45:49.016Z"
+            },
+            {
+              "platform": "instagram",
+              "configured": false,
+              "attempted": false,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Configuration required: INSTAGRAM_UPLOAD_ENABLED, INSTAGRAM_ACCOUNT_ID, and INSTAGRAM_ACCESS_TOKEN (or Facebook Page token).",
+              "startedAt": "2026-07-17T19:45:49.017Z",
+              "completedAt": "2026-07-17T19:45:49.017Z"
+            }
+          ],
+          "completedAt": "2026-07-17T19:45:49.553Z"
+        }
+      ],
+      "status": "completed",
+      "options": {
+        "count": 1,
+        "dryRun": true,
+        "youtubeOnly": false
+      },
+      "updatedAt": "2026-07-17T19:45:49.558Z",
+      "completedAt": "2026-07-17T19:45:49.558Z"
+    },
+    "batch-2026-07-17T19-51-22-096Z": {
+      "id": "batch-2026-07-17T19-51-22-096Z",
+      "startedAt": "2026-07-17T19:51:22.097Z",
+      "targetCount": 1,
+      "cases": [
+        {
+          "startedAt": "2026-07-17T19:51:22.101Z",
+          "caseId": "CASE-000005",
+          "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000005",
+          "platforms": [
+            {
+              "platform": "youtube",
+              "configured": true,
+              "attempted": true,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Dry run: YouTube upload not performed.",
+              "startedAt": "2026-07-17T19:59:09.794Z",
+              "completedAt": "2026-07-17T19:59:09.794Z"
+            },
+            {
+              "platform": "facebook",
+              "configured": false,
+              "attempted": false,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Configuration required: FACEBOOK_UPLOAD_ENABLED, FACEBOOK_PAGE_ID, and FACEBOOK_PAGE_ACCESS_TOKEN.",
+              "startedAt": "2026-07-17T19:59:09.794Z",
+              "completedAt": "2026-07-17T19:59:09.794Z"
+            },
+            {
+              "platform": "instagram",
+              "configured": false,
+              "attempted": false,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Configuration required: INSTAGRAM_UPLOAD_ENABLED, INSTAGRAM_ACCOUNT_ID, and INSTAGRAM_ACCESS_TOKEN (or Facebook Page token).",
+              "startedAt": "2026-07-17T19:59:09.794Z",
+              "completedAt": "2026-07-17T19:59:09.794Z"
+            }
+          ],
+          "completedAt": "2026-07-17T19:59:10.361Z"
+        }
+      ],
+      "status": "completed",
+      "options": {
+        "count": 1,
+        "dryRun": true,
+        "youtubeOnly": false
+      },
+      "updatedAt": "2026-07-17T19:59:10.367Z",
+      "completedAt": "2026-07-17T19:59:10.366Z"
+    },
+    "batch-2026-07-17T20-08-34-847Z": {
+      "id": "batch-2026-07-17T20-08-34-847Z",
+      "startedAt": "2026-07-17T20:08:34.848Z",
+      "targetCount": 1,
+      "cases": [
+        {
+          "startedAt": "2026-07-17T20:48:32.404Z",
+          "caseId": "CASE-000007",
+          "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000007",
+          "platforms": [
+            {
+              "platform": "youtube",
+              "configured": true,
+              "attempted": true,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Dry run: YouTube upload not performed.",
+              "startedAt": "2026-07-17T20:57:17.841Z",
+              "completedAt": "2026-07-17T20:57:17.841Z"
+            },
+            {
+              "platform": "facebook",
+              "configured": false,
+              "attempted": false,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Configuration required: FACEBOOK_UPLOAD_ENABLED, FACEBOOK_PAGE_ID, and FACEBOOK_PAGE_ACCESS_TOKEN.",
+              "startedAt": "2026-07-17T20:57:17.841Z",
+              "completedAt": "2026-07-17T20:57:17.841Z"
+            },
+            {
+              "platform": "instagram",
+              "configured": false,
+              "attempted": false,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Configuration required: INSTAGRAM_UPLOAD_ENABLED, INSTAGRAM_ACCOUNT_ID, and INSTAGRAM_ACCESS_TOKEN (or Facebook Page token).",
+              "startedAt": "2026-07-17T20:57:17.841Z",
+              "completedAt": "2026-07-17T20:57:17.841Z"
+            }
+          ],
+          "completedAt": "2026-07-17T20:57:18.153Z"
+        }
+      ],
+      "status": "completed",
+      "options": {
+        "count": 1,
+        "dryRun": true,
+        "youtubeOnly": false
+      },
+      "updatedAt": "2026-07-17T20:57:18.158Z",
+      "completedAt": "2026-07-17T20:57:18.158Z"
+    },
+    "batch-2026-07-17T21-03-07-293Z": {
+      "id": "batch-2026-07-17T21-03-07-293Z",
+      "startedAt": "2026-07-17T21:03:07.293Z",
+      "targetCount": 1,
+      "cases": [
+        {
+          "startedAt": "2026-07-17T21:03:07.302Z",
+          "caseId": "CASE-000008",
+          "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000008",
+          "platforms": [
+            {
+              "platform": "youtube",
+              "configured": true,
+              "attempted": true,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Dry run: YouTube upload not performed.",
+              "startedAt": "2026-07-17T21:10:58.783Z",
+              "completedAt": "2026-07-17T21:10:58.783Z"
+            },
+            {
+              "platform": "facebook",
+              "configured": false,
+              "attempted": false,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Configuration required: FACEBOOK_UPLOAD_ENABLED, FACEBOOK_PAGE_ID, and FACEBOOK_PAGE_ACCESS_TOKEN.",
+              "startedAt": "2026-07-17T21:10:58.783Z",
+              "completedAt": "2026-07-17T21:10:58.783Z"
+            },
+            {
+              "platform": "instagram",
+              "configured": false,
+              "attempted": false,
+              "uploaded": false,
+              "mediaId": null,
+              "url": null,
+              "error": "Configuration required: INSTAGRAM_UPLOAD_ENABLED, INSTAGRAM_ACCOUNT_ID, and INSTAGRAM_ACCESS_TOKEN (or Facebook Page token).",
+              "startedAt": "2026-07-17T21:10:58.783Z",
+              "completedAt": "2026-07-17T21:10:58.783Z"
+            }
+          ],
+          "completedAt": "2026-07-17T21:10:59.057Z"
+        }
+      ],
+      "status": "completed",
+      "options": {
+        "count": 1,
+        "dryRun": true,
+        "youtubeOnly": false
+      },
+      "updatedAt": "2026-07-17T21:10:59.062Z",
+      "completedAt": "2026-07-17T21:10:59.061Z"
+    },
+    "dry-run-2026-07-18T06-18-22-616Z": {
+      "id": "dry-run-2026-07-18T06-18-22-616Z",
+      "startedAt": "2026-07-18T06:18:22.616Z",
+      "completedAt": "2026-07-18T06:18:23.798Z",
+      "targetCount": 1,
+      "cases": [],
+      "status": "dry_run_completed",
+      "dryRun": true,
+      "options": {
+        "count": 1,
+        "dryRun": true,
+        "youtubeOnly": false
+      },
+      "plan": [
+        {
+          "sequence": 1,
+          "action": "generate-and-publish-case",
+          "simulated": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "Output directory writable",
+          "ok": true
+        },
+        {
+          "name": "FFmpeg available",
+          "ok": true
+        },
+        {
+          "name": "FFprobe available",
+          "ok": true
+        },
+        {
+          "name": "OpenRouter key present",
+          "ok": true,
+          "detail": "Presence only; no API call made."
+        },
+        {
+          "name": "YouTube credentials present",
+          "ok": true,
+          "detail": "Optional unless YouTube publishing is enabled."
+        }
+      ],
+      "updatedAt": "2026-07-18T06:18:23.807Z"
+    },
+    "dry-run-2026-07-18T06-18-36-131Z": {
+      "id": "dry-run-2026-07-18T06-18-36-131Z",
+      "startedAt": "2026-07-18T06:18:36.131Z",
+      "completedAt": "2026-07-18T06:18:37.250Z",
+      "targetCount": 1,
+      "cases": [],
+      "status": "dry_run_completed",
+      "dryRun": true,
+      "options": {
+        "count": 1,
+        "dryRun": true,
+        "youtubeOnly": false
+      },
+      "plan": [
+        {
+          "sequence": 1,
+          "action": "generate-and-publish-case",
+          "simulated": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "Output directory writable",
+          "ok": true
+        },
+        {
+          "name": "FFmpeg available",
+          "ok": true
+        },
+        {
+          "name": "FFprobe available",
+          "ok": true
+        },
+        {
+          "name": "OpenRouter key present",
+          "ok": true,
+          "detail": "Presence only; no API call made."
+        },
+        {
+          "name": "YouTube credentials present",
+          "ok": true,
+          "detail": "Optional unless YouTube publishing is enabled."
+        }
+      ],
+      "updatedAt": "2026-07-18T06:18:37.262Z"
+    }
+  },
+  "analytics": {
+    "refreshedAt": "2026-07-17T21:10:58.786Z",
+    "youtube": {
+      "configured": true,
+      "error": "Request failed with status code 403"
+    },
+    "facebook": {
+      "configured": false
+    },
+    "instagram": {
+      "configured": false
+    }
+  },
+  "health": {},
+  "logs": []
+}
