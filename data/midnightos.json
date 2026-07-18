@@ -3,10 +3,10 @@
   "cases": {
     "CASE-000002": {
       "caseId": "CASE-000002",
-      "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000002",
+      "outputDir": "output/CASE-000002",
       "generatedAt": "2026-07-17T19:09:45.913Z",
       "files": {
-        "video": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000002\\horror_video.mp4"
+        "video": "output/CASE-000002/horror_video.mp4"
       },
       "status": "generated",
       "updatedAt": "2026-07-17T19:09:45.914Z",
@@ -49,10 +49,10 @@
     },
     "CASE-000003": {
       "caseId": "CASE-000003",
-      "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000003",
+      "outputDir": "output/CASE-000003",
       "generatedAt": "2026-07-17T19:32:06.920Z",
       "files": {
-        "video": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000003\\horror_video.mp4"
+        "video": "output/CASE-000003/horror_video.mp4"
       },
       "status": "generated",
       "updatedAt": "2026-07-17T19:32:06.920Z",
@@ -95,10 +95,10 @@
     },
     "CASE-000004": {
       "caseId": "CASE-000004",
-      "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000004",
+      "outputDir": "output/CASE-000004",
       "generatedAt": "2026-07-17T19:45:49.017Z",
       "files": {
-        "video": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000004\\horror_video.mp4"
+        "video": "output/CASE-000004/horror_video.mp4"
       },
       "status": "generated",
       "updatedAt": "2026-07-17T19:45:49.018Z",
@@ -141,10 +141,10 @@
     },
     "CASE-000005": {
       "caseId": "CASE-000005",
-      "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000005",
+      "outputDir": "output/CASE-000005",
       "generatedAt": "2026-07-17T19:59:09.794Z",
       "files": {
-        "video": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000005\\horror_video.mp4"
+        "video": "output/CASE-000005/horror_video.mp4"
       },
       "status": "generated",
       "updatedAt": "2026-07-17T19:59:09.795Z",
@@ -187,10 +187,10 @@
     },
     "CASE-000007": {
       "caseId": "CASE-000007",
-      "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000007",
+      "outputDir": "output/CASE-000007",
       "generatedAt": "2026-07-17T20:57:17.841Z",
       "files": {
-        "video": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000007\\horror_video.mp4"
+        "video": "output/CASE-000007/horror_video.mp4"
       },
       "status": "generated",
       "updatedAt": "2026-07-17T20:57:17.842Z",
@@ -233,10 +233,10 @@
     },
     "CASE-000008": {
       "caseId": "CASE-000008",
-      "outputDir": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000008",
+      "outputDir": "output/CASE-000008",
       "generatedAt": "2026-07-17T21:10:58.783Z",
       "files": {
-        "video": "C:\\Users\\Krishna Chaudhary\\MidnightOS-Updated\\MidnightOS\\output\\CASE-000008\\horror_video.mp4"
+        "video": "output/CASE-000008/horror_video.mp4"
       },
       "status": "generated",
       "updatedAt": "2026-07-17T21:10:58.784Z",
@@ -706,6 +706,328 @@
         }
       ],
       "updatedAt": "2026-07-18T06:18:37.262Z"
+    },
+    "dry-run-2026-07-18T07-01-41-414Z": {
+      "id": "dry-run-2026-07-18T07-01-41-414Z",
+      "startedAt": "2026-07-18T07:01:41.414Z",
+      "completedAt": "2026-07-18T07:01:41.658Z",
+      "targetCount": 1,
+      "cases": [],
+      "status": "dry_run_completed",
+      "dryRun": true,
+      "options": {
+        "count": 1,
+        "dryRun": true,
+        "youtubeOnly": false
+      },
+      "plan": [
+        {
+          "sequence": 1,
+          "action": "generate-and-publish-case",
+          "simulated": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "Output directory writable",
+          "ok": true
+        },
+        {
+          "name": "FFmpeg available",
+          "ok": true
+        },
+        {
+          "name": "FFprobe available",
+          "ok": true
+        },
+        {
+          "name": "OpenRouter key present",
+          "ok": true,
+          "detail": "Presence only; no API call made."
+        },
+        {
+          "name": "YouTube credentials present",
+          "ok": true,
+          "detail": "Optional unless YouTube publishing is enabled."
+        }
+      ],
+      "updatedAt": "2026-07-18T07:01:41.659Z"
+    },
+    "dry-run-2026-07-18T07-01-48-416Z": {
+      "id": "dry-run-2026-07-18T07-01-48-416Z",
+      "startedAt": "2026-07-18T07:01:48.416Z",
+      "completedAt": "2026-07-18T07:01:48.972Z",
+      "targetCount": 1,
+      "cases": [],
+      "status": "dry_run_completed",
+      "dryRun": true,
+      "options": {
+        "count": 1,
+        "dryRun": true,
+        "youtubeOnly": false
+      },
+      "plan": [
+        {
+          "sequence": 1,
+          "action": "generate-and-publish-case",
+          "simulated": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "Output directory writable",
+          "ok": true
+        },
+        {
+          "name": "FFmpeg available",
+          "ok": true
+        },
+        {
+          "name": "FFprobe available",
+          "ok": true
+        },
+        {
+          "name": "OpenRouter key present",
+          "ok": true,
+          "detail": "Presence only; no API call made."
+        },
+        {
+          "name": "YouTube credentials present",
+          "ok": true,
+          "detail": "Optional unless YouTube publishing is enabled."
+        }
+      ],
+      "updatedAt": "2026-07-18T07:01:48.980Z"
+    },
+    "dry-run-2026-07-18T16-10-44-116Z": {
+      "id": "dry-run-2026-07-18T16-10-44-116Z",
+      "startedAt": "2026-07-18T16:10:44.116Z",
+      "completedAt": "2026-07-18T16:10:44.449Z",
+      "targetCount": 1,
+      "cases": [],
+      "status": "dry_run_completed",
+      "dryRun": true,
+      "options": {
+        "count": 1,
+        "dryRun": true,
+        "youtubeOnly": false
+      },
+      "plan": [
+        {
+          "sequence": 1,
+          "action": "generate-and-publish-case",
+          "simulated": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "Output directory writable",
+          "ok": true
+        },
+        {
+          "name": "FFmpeg available",
+          "ok": true
+        },
+        {
+          "name": "FFprobe available",
+          "ok": true
+        },
+        {
+          "name": "OpenRouter key present",
+          "ok": true,
+          "detail": "Presence only; no API call made."
+        },
+        {
+          "name": "YouTube credentials present",
+          "ok": true,
+          "detail": "Optional unless YouTube publishing is enabled."
+        }
+      ],
+      "updatedAt": "2026-07-18T16:10:44.453Z"
+    },
+    "dry-run-2026-07-18T16-10-46-840Z": {
+      "id": "dry-run-2026-07-18T16-10-46-840Z",
+      "startedAt": "2026-07-18T16:10:46.840Z",
+      "completedAt": "2026-07-18T16:10:47.186Z",
+      "targetCount": 1,
+      "cases": [],
+      "status": "dry_run_completed",
+      "dryRun": true,
+      "options": {
+        "count": 1,
+        "dryRun": true,
+        "youtubeOnly": false
+      },
+      "plan": [
+        {
+          "sequence": 1,
+          "action": "generate-and-publish-case",
+          "simulated": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "Output directory writable",
+          "ok": true
+        },
+        {
+          "name": "FFmpeg available",
+          "ok": true
+        },
+        {
+          "name": "FFprobe available",
+          "ok": true
+        },
+        {
+          "name": "OpenRouter key present",
+          "ok": true,
+          "detail": "Presence only; no API call made."
+        },
+        {
+          "name": "YouTube credentials present",
+          "ok": true,
+          "detail": "Optional unless YouTube publishing is enabled."
+        }
+      ],
+      "updatedAt": "2026-07-18T16:10:47.189Z"
+    },
+    "dry-run-2026-07-18T16-11-53-503Z": {
+      "id": "dry-run-2026-07-18T16-11-53-503Z",
+      "startedAt": "2026-07-18T16:11:53.503Z",
+      "completedAt": "2026-07-18T16:11:53.848Z",
+      "targetCount": 1,
+      "cases": [],
+      "status": "dry_run_completed",
+      "dryRun": true,
+      "options": {
+        "count": 1,
+        "dryRun": true,
+        "youtubeOnly": false
+      },
+      "plan": [
+        {
+          "sequence": 1,
+          "action": "generate-and-publish-case",
+          "simulated": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "Output directory writable",
+          "ok": true
+        },
+        {
+          "name": "FFmpeg available",
+          "ok": true
+        },
+        {
+          "name": "FFprobe available",
+          "ok": true
+        },
+        {
+          "name": "OpenRouter key present",
+          "ok": true,
+          "detail": "Presence only; no API call made."
+        },
+        {
+          "name": "YouTube credentials present",
+          "ok": true,
+          "detail": "Optional unless YouTube publishing is enabled."
+        }
+      ],
+      "updatedAt": "2026-07-18T16:11:53.851Z"
+    },
+    "dry-run-2026-07-18T16-12-15-972Z": {
+      "id": "dry-run-2026-07-18T16-12-15-972Z",
+      "startedAt": "2026-07-18T16:12:15.972Z",
+      "completedAt": "2026-07-18T16:12:16.278Z",
+      "targetCount": 1,
+      "cases": [],
+      "status": "dry_run_completed",
+      "dryRun": true,
+      "options": {
+        "count": 1,
+        "dryRun": true,
+        "youtubeOnly": false
+      },
+      "plan": [
+        {
+          "sequence": 1,
+          "action": "generate-and-publish-case",
+          "simulated": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "Output directory writable",
+          "ok": true
+        },
+        {
+          "name": "FFmpeg available",
+          "ok": true
+        },
+        {
+          "name": "FFprobe available",
+          "ok": true
+        },
+        {
+          "name": "OpenRouter key present",
+          "ok": true,
+          "detail": "Presence only; no API call made."
+        },
+        {
+          "name": "YouTube credentials present",
+          "ok": true,
+          "detail": "Optional unless YouTube publishing is enabled."
+        }
+      ],
+      "updatedAt": "2026-07-18T16:12:16.281Z"
+    },
+    "dry-run-2026-07-18T16-12-18-788Z": {
+      "id": "dry-run-2026-07-18T16-12-18-788Z",
+      "startedAt": "2026-07-18T16:12:18.788Z",
+      "completedAt": "2026-07-18T16:12:19.246Z",
+      "targetCount": 1,
+      "cases": [],
+      "status": "dry_run_completed",
+      "dryRun": true,
+      "options": {
+        "count": 1,
+        "dryRun": true,
+        "youtubeOnly": false
+      },
+      "plan": [
+        {
+          "sequence": 1,
+          "action": "generate-and-publish-case",
+          "simulated": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "Output directory writable",
+          "ok": true
+        },
+        {
+          "name": "FFmpeg available",
+          "ok": true
+        },
+        {
+          "name": "FFprobe available",
+          "ok": true
+        },
+        {
+          "name": "OpenRouter key present",
+          "ok": true,
+          "detail": "Presence only; no API call made."
+        },
+        {
+          "name": "YouTube credentials present",
+          "ok": true,
+          "detail": "Optional unless YouTube publishing is enabled."
+        }
+      ],
+      "updatedAt": "2026-07-18T16:12:19.250Z"
     }
   },
   "analytics": {

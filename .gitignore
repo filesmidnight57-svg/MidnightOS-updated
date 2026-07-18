@@ -7,3 +7,9 @@ video_temp/
 # Local OAuth token overrides
 youtube-oauth.json
 .midnightos/
+
+# Generated runtime state
+data/cases.json
+data/midnightos.json
+data/*.corrupt-*.bak
+data/*.tmp

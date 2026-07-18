@@ -100,6 +100,9 @@ async function generateCase() {
 }
 
 async function runSingleCase(options = {}) {
+  if (options.dryRun) {
+    return { dryRun: true, caseNumber: null, outputDir: null, platforms: [] };
+  }
   const generated = await generateCase();
   const videoPath = path.join(generated.outputDir, "horror_video.mp4");
   upsertCase({ caseId: generated.caseNumber, outputDir: generated.outputDir, generatedAt: new Date().toISOString(), files: { video: videoPath }, status: "generated" });

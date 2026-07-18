@@ -1,92 +1,34 @@
-const fs = require("fs");
-const path = require("path");
+const path = require('path');
+const { readJsonState, atomicWriteJson } = require('./store');
 
-const dataFolderPath = path.resolve(
-  __dirname,
-  "..",
-  "..",
-  "data"
-);
+const casesFilePath = path.resolve(__dirname, '..', '..', 'data', 'cases.json');
 
-const casesFilePath = path.join(
-  dataFolderPath,
-  "cases.json"
-);
-
-function ensureCaseDatabase() {
-  if (!fs.existsSync(dataFolderPath)) {
-    fs.mkdirSync(dataFolderPath, {
-      recursive: true,
-    });
-  }
-
-  if (!fs.existsSync(casesFilePath)) {
-    fs.writeFileSync(
-      casesFilePath,
-      JSON.stringify(
-        {
-          lastCaseNumber: 0,
-        },
-        null,
-        2
-      ),
-      "utf8"
-    );
-  }
+function initialCaseDatabase() {
+  return { lastCaseNumber: 0 };
 }
 
 function readCaseDatabase() {
-  ensureCaseDatabase();
-
-  try {
-    const rawData = fs.readFileSync(
-      casesFilePath,
-      "utf8"
-    );
-
-    const parsedData = JSON.parse(rawData);
-
-    if (
-      typeof parsedData.lastCaseNumber !== "number" ||
-      parsedData.lastCaseNumber < 0
-    ) {
-      throw new Error(
-        "lastCaseNumber valid number nahi hai."
-      );
-    }
-
-    return parsedData;
-  } catch (error) {
-    throw new Error(
-      `cases.json read nahi hui: ${error.message}`
-    );
+  const data = readJsonState(casesFilePath, initialCaseDatabase);
+  if (!Number.isInteger(data.lastCaseNumber) || data.lastCaseNumber < 0) {
+    const reset = initialCaseDatabase();
+    atomicWriteJson(casesFilePath, reset);
+    return reset;
   }
+  return data;
 }
 
 function saveCaseDatabase(data) {
-  try {
-    fs.writeFileSync(
-      casesFilePath,
-      JSON.stringify(data, null, 2),
-      "utf8"
-    );
-  } catch (error) {
-    throw new Error(
-      `cases.json save nahi hui: ${error.message}`
-    );
-  }
+  atomicWriteJson(casesFilePath, data);
 }
 
 function getNextCaseNumber() {
   const database = readCaseDatabase();
-
   database.lastCaseNumber += 1;
-
   saveCaseDatabase(database);
-
-  return `CASE-${String(
-    database.lastCaseNumber
-  ).padStart(6, "0")}`;
+  return `CASE-${String(database.lastCaseNumber).padStart(6, '0')}`;
 }
 
 module.exports = getNextCaseNumber;
+module.exports.readCaseDatabase = readCaseDatabase;
+module.exports.saveCaseDatabase = saveCaseDatabase;
+module.exports.casesFilePath = casesFilePath;

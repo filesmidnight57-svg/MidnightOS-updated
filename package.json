@@ -9,7 +9,7 @@
     "batch": "node src/batch.js",
     "morning": "node src/morning.js",
     "doctor": "node src/doctor.js",
-    "check": "node --check src/app.js && node --check src/morning.js && node --check src/publishers.js && node --check src/dashboard.js && node --check src/analytics.js && node --check src/utils/caseManager.js",
+    "check": "node -e \"const fs=require('fs'),path=require('path'),cp=require('child_process');const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(d,e.name)):e.name.endsWith('.js')?[path.join(d,e.name)]:[]);for(const f of [...walk('src'),...walk('test')]){const r=cp.spawnSync(process.execPath,['--check',f],{stdio:'inherit'});if(r.status)process.exit(r.status)}\"",
     "test": "node --test --test-concurrency=1 test/*.test.js",
     "publish": "node src/youtubePublisher.js",
     "dashboard": "node src/dashboard.js",

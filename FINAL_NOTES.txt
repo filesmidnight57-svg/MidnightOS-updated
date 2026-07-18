@@ -1,0 +1,20 @@
+MIDNIGHTOS FINAL HARDENED BUILD
+
+Verified locally in this package:
+- npm test: 8/8 passed
+- npm run check: passed for every JavaScript file in src and test
+- npm run morning -- --count=1 --dry-run: passed without AI, render, publish, or analytics calls
+
+Implemented:
+- Real morning dry-run that exits before generation
+- PID-based stale/corrupt lock recovery
+- Explicit UTF-8 state reads/writes and Hindi mojibake repair
+- Atomic JSON writes with fsync and temp-file cleanup
+- Corrupt/empty JSON backup and automatic recovery
+- Portable output/data paths, including legacy Windows project paths
+- Runtime state ignore rules
+- Safe cases.json creation/recovery
+- Full-project JavaScript syntax check
+- Regression tests for dry-run, locks, UTF-8, corruption, atomic writes, and portable paths
+
+External live publishing cannot be truthfully verified without valid account credentials and an intentional live upload. YouTube/Facebook/Instagram remain disabled or dry-run safe according to environment settings.
