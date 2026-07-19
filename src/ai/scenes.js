@@ -1,4 +1,4 @@
-const { DEFAULT_MODEL, requestChatCompletion } = require("./openrouterClient");
+const { DEFAULT_MODEL, requestChatCompletion } = require("./ollamaClient");
 
 function cleanJsonResponse(content) {
   return content
@@ -11,7 +11,7 @@ async function generateScenes(story) {
   const rawContent = await requestChatCompletion({
     moduleName: "src/ai/scenes.js",
     payload: {
-      model: process.env.OPENROUTER_MODEL || DEFAULT_MODEL,
+      model: process.env.OLLAMA_MODEL || DEFAULT_MODEL,
       max_tokens: 1800,
       temperature: 0.75,
       messages: [

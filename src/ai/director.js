@@ -1,11 +1,10 @@
-const { DEFAULT_MODEL, OPENROUTER_API_URL, requestChatCompletion } = require("./openrouterClient");
+const { DEFAULT_MODEL, requestChatCompletion } = require("./ollamaClient");
 const {
   getMainCharacter,
   applyPermanentCharacterToDirectorPlan,
 } = require("../characterManager");
 
-const DIRECTOR_MODEL = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
-const DIRECTOR_API_URL = process.env.OPENROUTER_API_URL || OPENROUTER_API_URL;
+const DIRECTOR_MODEL = process.env.OLLAMA_MODEL || DEFAULT_MODEL;
 const IMAGE_PROMPT_MAX_LENGTH = 620;
 const DIRECTOR_MAX_TOKENS = 1800;
 const STORY_CONTEXT_MAX_LENGTH = 3600;

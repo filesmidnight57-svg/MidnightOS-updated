@@ -29,7 +29,7 @@ test('morning dry-run does not create a case or invoke content pipeline', () => 
   });
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const combined = `${result.stdout}\n${result.stderr}`;
-  assert.doesNotMatch(combined, /Generating Hindi Case Story|OpenRouter request|Generating Scene|Rendering Final/i);
+  assert.doesNotMatch(combined, /Generating Hindi Case Story|Ollama request|Generating Scene|Rendering Final/i);
   const after = new Set(fs.readdirSync(output).filter((name) => /^CASE-\d{6}$/.test(name)));
   assert.deepEqual(after, before);
   assert.equal(fs.existsSync(LOCK), false);

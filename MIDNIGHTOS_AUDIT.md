@@ -24,7 +24,7 @@ The uploaded repository was still at `ae835b2`. The claimed `d958a7a` change was
 - `npm test`: 7/7 passed.
 - `npm run check`: passed.
 - `node src/morning.js --count=1 --dry-run`: passed.
-- Dry-run output contained no AI, OpenRouter, image, voice, or rendering messages.
+- Dry-run output contained no AI, Ollama, image, voice, or rendering messages.
 - Dry-run created no new `CASE-xxxxxx` directory.
 - `.morning.lock` was removed after completion.
 
