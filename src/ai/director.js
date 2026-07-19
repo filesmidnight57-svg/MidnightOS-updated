@@ -6,7 +6,9 @@ const {
 
 const DIRECTOR_MODEL = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
 const DIRECTOR_API_URL = process.env.OPENROUTER_API_URL || OPENROUTER_API_URL;
-const IMAGE_PROMPT_MAX_LENGTH = 900;
+const IMAGE_PROMPT_MAX_LENGTH = 620;
+const DIRECTOR_MAX_TOKENS = 1800;
+const STORY_CONTEXT_MAX_LENGTH = 3600;
 
 function logDirectorJsonFailure(reason, detail) {
   const safeDetail = detail ? ` ${detail}` : "";
@@ -129,7 +131,7 @@ function truncateText(value, maxLength) {
 
 function normalizeImagePrompt(prompt) {
   const safePrompt = typeof prompt === "string" ? prompt.trim() : "";
-  const requiredEnding = " vertical 9:16 composition, ultra-realistic cinematic horror, no text, no captions, no logo, no watermark.";
+  const requiredEnding = " vertical 9:16, ultra-realistic cinematic horror, no text, no captions, no logo, no watermark.";
   const availableLength = IMAGE_PROMPT_MAX_LENGTH - requiredEnding.length;
   const shortened = truncateText(safePrompt, Math.max(120, availableLength));
 
@@ -138,6 +140,27 @@ function normalizeImagePrompt(prompt) {
   }
 
   return truncateText(`${shortened}${requiredEnding}`, IMAGE_PROMPT_MAX_LENGTH);
+}
+
+function compactStory(story) {
+  return truncateText(String(story || "").replace(/\s+/g, " ").trim(), STORY_CONTEXT_MAX_LENGTH);
+}
+
+function compactCharacter(character) {
+  return JSON.stringify({
+    name: character.name,
+    age: character.age,
+    gender: character.gender,
+    nationality: character.nationality,
+    role: character.role,
+    faceDescription: character.faceDescription,
+    hair: character.hair,
+    facialHair: character.facialHair,
+    bodyBuild: character.bodyBuild,
+    clothing: character.clothing,
+    accessories: character.accessories,
+    consistencyPrompt: character.consistencyPrompt,
+  });
 }
 
 function validateDirectorPlan(plan) {
@@ -195,51 +218,33 @@ function validateDirectorPlan(plan) {
   return plan;
 }
 
-function buildDirectorMessages(story, mode = "normal") {
-  const shorter = mode === "short";
-  const imagePromptLimit = shorter ? 520 : IMAGE_PROMPT_MAX_LENGTH;
+function buildDirectorMessages(story) {
   const mainCharacter = getMainCharacter();
-  const characterJson = JSON.stringify({
-    name: mainCharacter.name,
-    age: mainCharacter.age,
-    gender: mainCharacter.gender,
-    nationality: mainCharacter.nationality,
-    role: mainCharacter.role,
-    faceDescription: mainCharacter.faceDescription,
-    hair: mainCharacter.hair,
-    facialHair: mainCharacter.facialHair,
-    bodyBuild: mainCharacter.bodyBuild,
-    clothing: mainCharacter.clothing,
-    accessories: mainCharacter.accessories,
-    consistencyPrompt: mainCharacter.consistencyPrompt,
-  });
+  const characterJson = compactCharacter(mainCharacter);
+  const compactInputStory = compactStory(story);
 
   return [
     {
       role: "system",
-      content: [
-        "You are MidnightOS AI Director for realistic Hindi horror case videos.",
-        "Return only valid JSON, no markdown, no code fences, no explanations.",
-        "Keep the exact requested schema and exactly 6 scenes.",
-        `Each imagePrompt must be English and under ${imagePromptLimit} characters.`,
-        "Use only the permanent main character profile supplied by the user. Never invent or alter the character name, age, face, hairstyle, moustache, body type, clothing, or accessories.",
-      ].join(" "),
+      content:
+        "MidnightOS director. Return ONLY minified valid JSON. No markdown. Exactly 6 scenes. Use supplied character exactly. Short values. English imagePrompt <=620 chars.",
     },
     {
       role: "user",
-      content: `Permanent main character profile (copy these exact details into mainCharacter and every imagePrompt):\n${characterJson}\n\nStory:\n${story}\n\nReturn JSON with this exact schema: {"caseInfo":{"caseNumber":"CASE #0001","caseTitle":"Short Hindi case title","location":"Indian location","evidenceType":"CCTV Footage, Emergency Call, Voice Recording, Police Bodycam, Diary or other evidence","status":"UNSOLVED, CLASSIFIED or RESTRICTED"},"mainCharacter":{"name":"Character name","age":35,"gender":"male or female","nationality":"Indian","role":"role","faceDescription":"fixed face","hair":"fixed hair","facialHair":"fixed facial hair or clean-shaven","bodyBuild":"fixed build","clothing":"fixed clothing","accessories":"fixed accessories","consistencyPrompt":"one complete English sentence with exact same appearance"},"visualBible":{"genre":"Found footage psychological horror","aspectRatio":"9:16 vertical","overallStyle":"Ultra-realistic cinematic Indian horror","colorPalette":"Cold blue, desaturated grey and deep black","filmTexture":"Subtle film grain","lightingStyle":"Low-key practical lighting","locationContinuity":"recurring location description","negativePrompt":"cartoon, illustration, anime, distorted anatomy, extra fingers, duplicate people, text, captions, subtitles, watermark, logo"},"scenes":[{"sceneNumber":1,"title":"Short Hindi title","storyMoment":"Hindi story moment","cameraShot":"shot type","cameraMovement":"movement","lens":"24mm/35mm/50mm/85mm","lighting":"lighting","mood":"mood","colorGrade":"grade","soundSuggestion":"sound","imagePrompt":"English prompt"}]} Rules: scenes 1-6 = hook, investigation, first clue, danger, twist, unresolved ending. Use realistic Indian people/locations. Every imagePrompt must begin with the permanent character consistency prompt exactly as supplied, then include the recurring location, camera, lens, lighting, mood, color grade, vertical 9:16, ultra-realistic cinematic horror, no text/captions/logo/watermark. No readable signs/documents/messages.${shorter ? " Make all string values concise." : ""}`,
+      content: `CHAR=${characterJson}\nSTORY=${compactInputStory}\nJSON schema: {"caseInfo":{"caseNumber":"CASE #0001","caseTitle":"Hindi title","location":"Indian location","evidenceType":"CCTV Footage/Emergency Call/Voice Recording/Police Bodycam/Diary/Other","status":"UNSOLVED/CLASSIFIED/RESTRICTED"},"mainCharacter":CHAR,"visualBible":{"genre":"Found footage psychological horror","aspectRatio":"9:16 vertical","overallStyle":"Ultra-realistic cinematic Indian horror","colorPalette":"Cold blue, desaturated grey, deep black","filmTexture":"Subtle film grain","lightingStyle":"Low-key practical lighting","locationContinuity":"recurring location","negativePrompt":"cartoon,anime,text,captions,subtitles,watermark,logo,distorted anatomy,extra fingers,duplicate people"},"scenes":[{"sceneNumber":1,"title":"Hindi","storyMoment":"Hindi","cameraShot":"shot","cameraMovement":"move","lens":"24mm/35mm/50mm/85mm","lighting":"light","mood":"mood","colorGrade":"grade","soundSuggestion":"sound","imagePrompt":"CHAR.consistencyPrompt + location + shot/lens/light/mood/grade + vertical 9:16 + no text/captions/logo/watermark"}]} Make scenes 1-6: hook, investigation, first clue, danger, twist, unresolved ending. Return compact JSON only.`,
     },
   ];
 }
 
-async function requestDirectorPlan(story, mode = "normal") {
+async function requestDirectorPlan(story) {
   return requestChatCompletion({
     moduleName: "src/ai/director.js",
     payload: {
       model: DIRECTOR_MODEL,
-      max_tokens: mode === "short" ? 2200 : 3200,
-      temperature: mode === "short" ? 0.35 : 0.6,
-      messages: buildDirectorMessages(story, mode),
+      max_tokens: DIRECTOR_MAX_TOKENS,
+      temperature: 0.25,
+      response_format: { type: "json_object" },
+      messages: buildDirectorMessages(story),
     },
     timeout: 180000,
   });
@@ -266,29 +271,16 @@ async function generateDirectorPlan(story) {
     throw new Error("Director AI ke liye story empty hai.");
   }
 
-  const attempts = [
-    { mode: "normal", reason: "initial request" },
-    { mode: "normal", reason: "automatic retry after incomplete or malformed JSON" },
-    { mode: "short", reason: "short JSON recovery request" },
-  ];
-  let lastError;
-
-  for (const attempt of attempts) {
-    try {
-      const rawContent = await requestDirectorPlan(story, attempt.mode);
-      return parseDirectorResponse(rawContent);
-    } catch (error) {
-      lastError = error;
-      const detail = error.incompleteJson
-        ? "Response appears truncated or ended inside a JSON string."
-        : error.message;
-      logDirectorJsonFailure(attempt.reason, detail);
-    }
+  try {
+    const rawContent = await requestDirectorPlan(story);
+    return parseDirectorResponse(rawContent);
+  } catch (error) {
+    const detail = error.incompleteJson
+      ? "Response appears truncated or ended inside a JSON string."
+      : error.message;
+    logDirectorJsonFailure("compact JSON request", detail);
+    throw error;
   }
-
-  throw new Error(
-    `Director JSON recovery failed after ${attempts.length} attempts. Last error: ${lastError?.message || "unknown error"}`
-  );
 }
 
 module.exports = generateDirectorPlan;
