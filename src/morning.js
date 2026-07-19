@@ -117,7 +117,7 @@ function buildDryRunBatch(options, target) {
     })() },
     { name: 'FFmpeg available', ok: commandAvailable('ffmpeg') },
     { name: 'FFprobe available', ok: commandAvailable('ffprobe') },
-    { name: 'OpenRouter key present', ok: Boolean(process.env.OPENROUTER_API_KEY), detail: 'Presence only; no API call made.' },
+    { name: 'Ollama model configured', ok: Boolean(process.env.OLLAMA_MODEL || 'qwen2.5:7b'), detail: 'Presence only; no API call made.' },
     { name: 'YouTube credentials present', ok: Boolean(process.env.YOUTUBE_CLIENT_ID && process.env.YOUTUBE_CLIENT_SECRET), detail: 'Optional unless YouTube publishing is enabled.' },
   ];
 
